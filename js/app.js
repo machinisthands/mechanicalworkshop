@@ -62,9 +62,9 @@
     // 0 = none, 1 = child, 2 = teen. Content blocking itself is set in AdSense > Brand safety.
     ageTreatment: "2",
     slots: {
-      article: "",   // job pages: between content sections
-      end: "",       // job pages: after Resources
-      home: ""       // home page: after the job cards
+      article: "1281073793",   // job pages: between content sections
+      end: "6888623694",       // job pages: after Resources
+      home: "7710750771"       // home page: after the job cards
     }
   };
   var preview = document.documentElement.hasAttribute("data-ad-preview");
