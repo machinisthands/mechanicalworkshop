@@ -1,183 +1,95 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta http-equiv="X-UA-Compatible" content="ie=edge" />
-    <link rel="stylesheet" href="../css/bootstrap.min.css">
-    <link rel="stylesheet" href="../css/style.css"/>
-    <link rel="icon" type="image/jpg" href="../images/mechanicalWorkshopLogo.png"/>
-    <title>Mechanical Workshop</title>
-    <meta name="google-adsense-account" content="ca-pub-7727895345119500">
-    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-7727895345119500"
-     crossorigin="anonymous"></script>
-  </head>
-  <body class="bg-black">
-    <!-- Loading Screen -->
-     <div id="loading-screen">
-        <div class="spinner"></div>
-    </div>
-    <header class="bg-black2" style="position: fixed; width: 100%; z-index: 20000;">
-        
-      <div class="row pt-1 pb-1 pl-3 text-white">
-          <div class="col-md-6 col-7 ">
-              <img src="../images/mechanicalWorkshop.png" alt="" class="img-fluid " style="width: 15em;">
-          </div>
-          <div class="col-md-6 col-5 my-auto">
-              <nav class="navbar navbar-expand-lg navbar-light ">
-                  <button class="navbar-toggler ml-auto " type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation" style="background-color: #232224;">
-                  <span class="navbar-toggler-icon " ></span>
-                  </button>
-              
-                  <div class="collapse navbar-collapse" id="navbarSupportedContent">
-                      <ul class="navbar-nav ml-auto">
-                            <li class="nav-item active">
-                                <a class="nav-link text-white" href="../cncLathe/index.html">LATHE<span class="sr-only">(current)</span></a>
-                            </li>
 
-                            <li class="nav-item">
-                                <a class="nav-link text-white" href="../cncMillingSub/index.html">MILLING SUB</a>
-                            </li>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>CNC Lathe | Mechanical Workshop – TKMCE</title>
+  <link rel="stylesheet" href="../css/style.css">
+  <meta name="description" content="CNC Lathe – Semester 6 mechanical workshop job at TKMCE: interactive 3D model, engineering drawing, process guide and machining video.">
 
+  <meta property="og:title" content="CNC Lathe | Mechanical Workshop – TKMCE">
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://machinisthands.github.io/tkmceworkshop/cncLathe/index.html">
+  <meta property="og:image" content="https://machinisthands.github.io/tkmceworkshop/img/jobs/cncLathe/og.jpg">
+  <meta property="og:image:alt" content="3D model of CNC Lathe">
+  <meta property="og:image:type" content="image/jpeg">
+  <meta property="og:image:width" content="1200">
+  <meta property="og:image:height" content="630">
+  <meta property="og:locale" content="en_IN">
+  <meta property="og:site_name" content="Mechanical Workshop – TKMCE">
+  <meta property="og:description" content="CNC Lathe – Semester 6 mechanical workshop job at TKMCE: interactive 3D model, engineering drawing, process guide and machining video.">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:image" content="https://machinisthands.github.io/tkmceworkshop/img/jobs/cncLathe/og.jpg">
 
-                            <li class="nav-item">
-                                <a class="nav-link text-white" href="../cncMilling/index.html">MILLING</a>
-                            </li>
+  <link rel="icon" href="../favicon.ico" sizes="any">
+  <link rel="icon" href="../icon.svg" type="image/svg+xml">
+  <link rel="apple-touch-icon" href="../icon.png">
+  <link rel="manifest" href="../site.webmanifest">
+  <meta name="theme-color" content="#35413A" media="(prefers-color-scheme: dark)">
+  <meta name="theme-color" content="#E1E7DF" media="(prefers-color-scheme: light)">
+  <meta name="color-scheme" content="dark light">
 
-                            <li class="nav-item">
-                                <a class="nav-link text-white" href="../toolAndCutterGrinding/index.html">ToolAndCutterGrinding</a>
-                            </li>
+  <link rel="canonical" href="https://machinisthands.github.io/tkmceworkshop/cncLathe/index.html">
+  <link rel="preload" as="image" href="../img/banner/06.webp" imagesrcset="../img/banner/06-640.webp 640w, ../img/banner/06.webp 1224w" imagesizes="100vw" fetchpriority="high">
+  <script type="application/ld+json">{"@context":"https://schema.org","@graph":[{"@type":"WebSite","@id":"https://machinisthands.github.io/tkmceworkshop/#website","name":"Mechanical Workshop – TKMCE","url":"https://machinisthands.github.io/tkmceworkshop/","inLanguage":"en","publisher":{"@id":"https://machinisthands.github.io/tkmceworkshop/#author"}},{"@type":"Person","@id":"https://machinisthands.github.io/tkmceworkshop/#author","name":"Machinist Hands","url":"https://machinisthands.blogspot.com/"},{"@type":"LearningResource","@id":"https://machinisthands.github.io/tkmceworkshop/cncLathe/index.html#resource","name":"CNC Lathe","description":"CNC Lathe – Semester 6 mechanical workshop job at TKMCE: interactive 3D model, engineering drawing, process guide and machining video.","url":"https://machinisthands.github.io/tkmceworkshop/cncLathe/index.html","image":"https://machinisthands.github.io/tkmceworkshop/img/jobs/cncLathe/og.jpg","educationalLevel":"Semester 6","inLanguage":"en","learningResourceType":["3D model","Engineering drawing","Process guide","Video"],"isPartOf":{"@id":"https://machinisthands.github.io/tkmceworkshop/#website"},"author":{"@id":"https://machinisthands.github.io/tkmceworkshop/#author"},"associatedMedia":[{"@type":"MediaObject","name":"Engineering drawing","contentUrl":"https://machinisthands.github.io/tkmceworkshop/img/jobs/cncLathe/drawing-full.jpg","encodingFormat":"image/jpeg"},{"@type":"MediaObject","name":"Process Guide","contentUrl":"https://machinisthands.github.io/tkmceworkshop/docs/cncLathe/process-guide.pdf","encodingFormat":"application/pdf"},{"@type":"MediaObject","name":"Sample Questions","contentUrl":"https://machinisthands.github.io/tkmceworkshop/docs/cncLathe/sample-questions.pdf","encodingFormat":"application/pdf"},{"@type":"MediaObject","name":"Model Questions & Answers","contentUrl":"https://machinisthands.github.io/tkmceworkshop/docs/cncLathe/model-questions.pdf","encodingFormat":"application/pdf"}]},{"@type":"BreadcrumbList","itemListElement":[{"@type":"ListItem","position":1,"name":"Home","item":"https://machinisthands.github.io/tkmceworkshop/"},{"@type":"ListItem","position":2,"name":"Semester 6","item":"https://machinisthands.github.io/tkmceworkshop/#semester-6"},{"@type":"ListItem","position":3,"name":"CNC Lathe","item":"https://machinisthands.github.io/tkmceworkshop/cncLathe/index.html"}]}]}</script>
+  <meta name="google-adsense-account" content="ca-pub-7727895345119500">
+  <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-7727895345119500" crossorigin="anonymous"></script>
+</head>
 
-                           
-                      </ul>
-                  </div>
-              </nav>
-          </div>
-      </div>
-  
-    </header>
-    
-    <section id="content" style="padding-top: 4.5em;">
-        <div class="slideshow-container" >
-            
-            <div class="mySlides">
-                <img src="../images/06.jpg" style="width:100%">
-            </div>
-            <div class="mySlides">
-                <img src="../images/01.jpg" style="width:100%">
-            </div>
-            <div class="mySlides">
-                <img src="../images/02.jpg" style="width:100%">
-            </div>
-            <div class="mySlides">
-                <img src="../images/03.jpg" style="width:100%">
-            </div>
-            <div class="mySlides">
-                <img src="../images/04.jpg" style="width:100%">
-            </div>
-            <div class="mySlides">
-                <img src="../images/05.jpg" style="width:100%">
-            </div>
-        <div>
-
-         <div class="dot-container">
-            <span class="dot" onclick="currentSlide(1)"></span>
-            <span class="dot" onclick="currentSlide(2)"></span>
-            <span class="dot" onclick="currentSlide(3)"></span>
-            <span class="dot" onclick="currentSlide(4)"></span>
-            <span class="dot" onclick="currentSlide(5)"></span>
-           <span class="dot" onclick="currentSlide(6)"></span>
-        </div>
-    </section>   
-
-    <section class="head-text" style="padding-top: 0em;">
-        <div class=" container ">
-            <h4 class="text-white font-weight-bold text-center">CNC Lathe </h4> 
-            <h5 class="text-white font-weight-bold pb-2"> 3D Model</h5>
-        </div>
-    </section>
-
-    <section>
-        <div class="container d-flex justify-content-center r">
-                <div class="scene rounded"></div>
-                
-        </div>
-    </section>
-
-    <section class="head-text" style="padding-top:32em ;">
-        <div class=" container">
-            <h5 class="text-white font-weight-bold">Engineering Drawing</h5>
-        </div>
-    </section>
-
-    <section class=" text-white pt-3 pb-2" id="" >
-        <div class="container">
-            <div class="row">
-                <div class="col-md-12 ">
-                    <img src="./Engineering Drawing.jpg" alt="" class="img-fluid rounded mx-auto d-block " style="width: 100%;">
-                </div>
-            </div>
-        </div>
-    </section>
- 
-       
-        <div class="container pt-3">
-            <div class="row">
-                <div class="col-12 text-center">
-                    <a class="btn btn-outline-light " href="https://youtu.be/RrjOVsi-XHs?si=Bn00ImYRr6VkLKff" role="button">video</a>
-                </div>
-            </div>
-        </div>
-
-     <div class="container pt-3">
-            <div class="row">
-                <div class="col-12 text-center">
-                    <a class="btn btn-outline-light " href="./lathe.pdf" role="button">Process Guide</a>
-                </div>
-            </div>
-        </div>
-
-    <div class="container pt-3">
-            <div class="row">
-                <div class="col-12 text-center">
-                    <a class="btn btn-outline-light " href="./sampleQuestionsLathe.pdf" role="button">Sample Questions</a>
-                </div>
-            </div>
-        </div>
-    <div class="container pt-3">
-            <div class="row">
-                <div class="col-12 text-center">
-                    <a class="btn btn-outline-light " href="./modelQuestionsLathe.pdf" role="button">Model Questions & Answer</a>
-                </div>
-            </div>
-        </div>
-    <div class="container pt-3">
-            <div class="row">
-                <div class="col-12 text-center">
-                    <a class="btn btn-outline-light " href="https://youtube.com/playlist?list=PLtw97_u_q2htmLj8iHorb3jEgDHC8eSfT&si=ysrQ7-bJegN9ysjs" role="button">Additional Information & Reference</a>
-                </div>
-            </div>
-        </div>
-
-       
-
-    <footer class="p-3">
-        <div class="container">
-            <div class="row">
-                <div class="col-md-12 text-center text-white">
-                    <p class="pt-3 font-weight-bold">Copyrights © 2024 <br> Created by <a href="https://machinisthands.blogspot.com/" style="text-decoration: none;display: inline-block;color: white;">Machinist Hands</a></p>
-                </div>
-            </div>
-        </div>
-    </footer>
-    
-      
-    
-    <script src="../js/jquery.min.js"></script>
-    <script src="../js/popper.min.js"></script>
-    <script src="../js/bootstrap.min.js"></script>
-    <script src="../js/three.min.js"></script>
-    <script src="../js/GLTFLoader.js"></script>
-    <script src="../js/app.js"></script>
-  </body>
+<body>
+<header class="site-header">
+<a class="logo" href="../index.html"><img src="../img/logo.png" alt="Mechanical Workshop – home" width="800" height="214"></a>
+<nav class="site-nav" aria-label="Semester 6 jobs">
+<button class="menu-btn" type="button" aria-expanded="false" aria-controls="menu" aria-label="Menu"><svg viewBox="0 0 30 30" aria-hidden="true"><path stroke="currentColor" stroke-width="2" stroke-linecap="round" d="M4 7h22M4 15h22M4 23h22"/></svg></button>
+<ul class="menu" id="menu" hidden>
+<li><a href="../index.html">Home</a></li>
+<li><a href="../cncLathe/index.html" aria-current="page">CNC Lathe</a></li>
+<li><a href="../cncMilling/index.html">CNC Milling</a></li>
+<li><a href="../cncMillingSub/index.html">CNC Milling Sub</a></li>
+</ul>
+</nav>
+</header>
+<main>
+<section class="banner" aria-label="Workshop highlights">
+<img src="../img/banner/06.webp" srcset="../img/banner/06-640.webp 640w, ../img/banner/06.webp 1224w" sizes="100vw" alt="Workshop highlight 1" width="1224" height="455" decoding="async" class="on" fetchpriority="high">
+<picture><source srcset="../img/banner/01-light-640.webp 640w, ../img/banner/01-light.webp 1224w" sizes="100vw" media="(prefers-color-scheme: light)"><img src="../img/banner/01.webp" srcset="../img/banner/01-640.webp 640w, ../img/banner/01.webp 1224w" sizes="100vw" alt="Workshop highlight 2" width="1224" height="455" decoding="async" loading="lazy"></picture>
+<picture><source srcset="../img/banner/02-light-640.webp 640w, ../img/banner/02-light.webp 1224w" sizes="100vw" media="(prefers-color-scheme: light)"><img src="../img/banner/02.webp" srcset="../img/banner/02-640.webp 640w, ../img/banner/02.webp 1224w" sizes="100vw" alt="Workshop highlight 3" width="1224" height="455" decoding="async" loading="lazy"></picture>
+<picture><source srcset="../img/banner/03-light-640.webp 640w, ../img/banner/03-light.webp 1224w" sizes="100vw" media="(prefers-color-scheme: light)"><img src="../img/banner/03.webp" srcset="../img/banner/03-640.webp 640w, ../img/banner/03.webp 1224w" sizes="100vw" alt="Workshop highlight 4" width="1224" height="455" decoding="async" loading="lazy"></picture>
+<picture><source srcset="../img/banner/04-light-640.webp 640w, ../img/banner/04-light.webp 1224w" sizes="100vw" media="(prefers-color-scheme: light)"><img src="../img/banner/04.webp" srcset="../img/banner/04-640.webp 640w, ../img/banner/04.webp 1224w" sizes="100vw" alt="Workshop highlight 5" width="1224" height="455" decoding="async" loading="lazy"></picture>
+<picture><source srcset="../img/banner/05-light-640.webp 640w, ../img/banner/05-light.webp 1224w" sizes="100vw" media="(prefers-color-scheme: light)"><img src="../img/banner/05.webp" srcset="../img/banner/05-640.webp 640w, ../img/banner/05.webp 1224w" sizes="100vw" alt="Workshop highlight 6" width="1224" height="455" decoding="async" loading="lazy"></picture>
+<div class="dots"><button class="dot" type="button" aria-label="Show highlight 1" aria-current="true"></button><button class="dot" type="button" aria-label="Show highlight 2" aria-current="false"></button><button class="dot" type="button" aria-label="Show highlight 3" aria-current="false"></button><button class="dot" type="button" aria-label="Show highlight 4" aria-current="false"></button><button class="dot" type="button" aria-label="Show highlight 5" aria-current="false"></button><button class="dot" type="button" aria-label="Show highlight 6" aria-current="false"></button></div>
+</section>
+<article class="job">
+<header class="wrap">
+<h1>CNC Lathe</h1>
+<p class="badge">Semester 6</p>
+</header>
+<section class="wrap" aria-labelledby="model-h">
+<div class="section-head"><h2 id="model-h">3D Model</h2><button class="btn btn-secondary" type="button" data-reset-view>Reset View</button></div>
+<div class="scene" data-model="../models/cncLathe.glb" role="img" aria-label="Interactive 3D model of CNC Lathe"></div>
+</section>
+<section class="wrap" aria-labelledby="drawing-h">
+<h2 id="drawing-h">Engineering Drawing</h2>
+<a class="drawing" href="../img/jobs/cncLathe/drawing-full.jpg" target="_blank" rel="noopener"><img src="../img/jobs/cncLathe/drawing.webp" srcset="../img/jobs/cncLathe/drawing-900.webp 900w, ../img/jobs/cncLathe/drawing.webp 1800w" sizes="(min-width: 960px) 890px, 100vw" alt="Engineering drawing of CNC Lathe" width="1800" height="1273" loading="lazy" decoding="async"></a>
+</section>
+<aside class="ad wrap" data-ad="article" aria-label="Advertisement"><p class="ad-label">Advertisement</p></aside>
+<section class="wrap" aria-labelledby="res-h">
+<h2 id="res-h">Resources</h2>
+<ul class="resources">
+<li><a class="res" href="https://youtu.be/RrjOVsi-XHs?si=Bn00ImYRr6VkLKff" target="_blank" rel="noopener"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M8 5.5v13l11-6.5z"/></svg><span>Machining Video<small>YouTube</small></span></a></li>
+<li><a class="res" href="../docs/cncLathe/process-guide.pdf" target="_blank" rel="noopener"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M14 3H6a1 1 0 0 0-1 1v16a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V8z"/><path d="M14 3v5h5M9 13h6M9 17h6"/></svg><span>Process Guide<small>PDF</small></span></a></li>
+<li><a class="res" href="../docs/cncLathe/sample-questions.pdf" target="_blank" rel="noopener"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M14 3H6a1 1 0 0 0-1 1v16a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V8z"/><path d="M14 3v5h5M9 13h6M9 17h6"/></svg><span>Sample Questions<small>PDF</small></span></a></li>
+<li><a class="res" href="../docs/cncLathe/model-questions.pdf" target="_blank" rel="noopener"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M14 3H6a1 1 0 0 0-1 1v16a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V8z"/><path d="M14 3v5h5M9 13h6M9 17h6"/></svg><span>Model Questions &amp; Answers<small>PDF</small></span></a></li>
+<li><a class="res" href="https://youtube.com/playlist?list=PLtw97_u_q2htmLj8iHorb3jEgDHC8eSfT&amp;si=ysrQ7-bJegN9ysjs" target="_blank" rel="noopener"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M14 4h6v6M20 4l-9 9"/><path d="M18 14v5a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V7a1 1 0 0 1 1-1h5"/></svg><span>Additional Information &amp; Reference<small>YouTube</small></span></a></li>
+</ul>
+</section>
+<aside class="ad wrap" data-ad="end" aria-label="Advertisement"><p class="ad-label">Advertisement</p></aside>
+</article>
+</main>
+<footer class="site-footer">
+<p>Copyright © 2024–2026<br>Created by <a href="https://machinisthands.blogspot.com/" rel="noopener">Machinist Hands</a></p>
+</footer>
+<script src="../js/app.js"></script>
+</body>
 </html>
