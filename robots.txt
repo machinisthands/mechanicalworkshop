@@ -4,4 +4,4 @@
 User-agent: *
 Disallow:
 
-Sitemap: https://machinisthands.github.io/tkmceworkshop/sitemap.xml
+Sitemap: https://machinisthands.github.io/mechanicalworkshop/sitemap.xml
