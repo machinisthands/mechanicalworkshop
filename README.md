@@ -11,7 +11,7 @@ The front page (job cards by semester, slideshow, WorldSkills link) lives in the
 [machinisthands.github.io](https://github.com/machinisthands/machinisthands.github.io) repository,
 but it loads its pictures, styles and scripts from this one. So the look of the whole site is
 changed here; only the front page's cards and text are changed there.
-`index.html` in this repository just redirects to the front page.
+This repository has no home page of its own: the front page is the home page.
 
 ## Theme
 
@@ -35,7 +35,6 @@ Pages, styles, scripts, images, models and documents each have one place:
 
 ```
 .
-├── index.html                 redirects to the front page (machinisthands.github.io/)
 ├── 1year/<job>/index.html     job pages (latheRook, latheBowl, latheBishop, edmScooter)
 ├── cncLathe/ cncMilling/ cncMillingSub/ toolAndCutterGrinding/   job pages (index.html only)
 ├── css/style.css              the only stylesheet (theme colours at the top)
@@ -50,7 +49,7 @@ Pages, styles, scripts, images, models and documents each have one place:
 ├── img/
 │   ├── logo.png               "MECHANICAL WORKSHOP" logo, all blue (#4872A1)
 │   ├── og-home.jpg            social preview of the front page (1200×630)
-│   ├── banner/                slideshow: 04, 05 (CNC Metalwork), 07 (chess set), 08 (India shape) –
+│   ├── banner/                slideshow: 04, 05 (CNC Metalwork), 07 (chess set + India shape) –
 │   │                          NN.webp, NN-640.webp (phones), NN-light.webp, NN-light-640.webp (light mode)
 │   └── jobs/<job>/            drawing.webp, drawing-900.webp, drawing-full.jpg, thumb.webp,
 │                              thumb-light.webp, og.jpg (WhatsApp/Facebook preview, 1200×630)
