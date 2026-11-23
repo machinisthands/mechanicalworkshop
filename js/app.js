@@ -89,12 +89,10 @@
   });
 
   /* ---------- 3D viewer: load Three.js only when the model scrolls near ---------- */
-  var scene = document.querySelector(".scene");
+  var scene = document.getElementById("viewer");
   if (!scene) return;
 
-  var scripts = ["vendor/three.min.js", "vendor/GLTFLoader.min.js", "vendor/DRACOLoader.min.js", "vendor/OrbitControls.min.js", "viewer.js"]
-    .map(function (f) { return jsBase + f; })
-    .concat((scene.getAttribute("data-extra") || "").split(/\s+/).filter(Boolean));
+  var scripts = ["vendor/three-bundle.min.js", "viewer.js"].map(function (f) { return jsBase + f; });
 
   function loadSequential(list, done, fail) {
     if (!list.length) return done();
@@ -109,11 +107,13 @@
   function boot() {
     if (started) return;
     started = true;
-    scene.innerHTML = '<div class="model-status">Loading 3D model…</div>';
+    var msg = document.getElementById("viewer-msg");
     loadSequential(scripts, function () {
-      if (window.initViewer) window.initViewer(scene, jsBase);
+      if (window.initViewer) window.initViewer(jsBase);
     }, function () {
-      scene.innerHTML = '<div class="model-status">3D viewer could not be loaded.</div>';
+      if (msg) msg.textContent = "3D viewer could not be loaded.";
+      var st = document.getElementById("viewer-status");
+      if (st) st.classList.add("error");
     });
   }
 

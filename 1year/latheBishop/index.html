@@ -71,8 +71,18 @@
 <a class="drawing" href="../../img/jobs/latheBishop/drawing-full.jpg" target="_blank" rel="noopener"><img src="../../img/jobs/latheBishop/drawing.webp" srcset="../../img/jobs/latheBishop/drawing-900.webp 900w, ../../img/jobs/latheBishop/drawing.webp 1800w" sizes="(min-width: 960px) 890px, 100vw" alt="Engineering drawing of Lathe Bishop" width="1800" height="1243" loading="lazy" decoding="async"></a>
 </section>
 <section class="wrap" aria-labelledby="model-h">
-<div class="section-head"><h2 id="model-h">3D Model</h2><button class="btn btn-secondary" type="button" data-reset-view>Reset View</button></div>
-<div class="scene" data-model="../../models/latheBishop.glb" role="img" aria-label="Interactive 3D model of Lathe Bishop"></div>
+<div class="viewer-head">
+<h2 id="model-h">3D Model</h2>
+<div class="viewer-tools" role="toolbar" aria-label="3D view controls">
+<button type="button" id="btn-rotate" aria-pressed="true" title="Auto-rotate"><span aria-hidden="true">⟳</span>Rotate</button>
+<button type="button" id="btn-flip" aria-pressed="false" title="Turn the part over to see the other side"><span aria-hidden="true">⇅</span><span id="flip-label">Show bottom</span></button>
+<button type="button" id="btn-reset" title="Reset view"><span aria-hidden="true">⌖</span>Reset</button>
+</div>
+</div>
+<div class="viewer" id="viewer" data-model="../../models/latheBishop.glb" role="img" aria-label="Interactive 3D model of Lathe Bishop">
+<div class="viewer-status" id="viewer-status" role="status"><div class="bar"><span id="viewer-bar"></span></div><p id="viewer-msg">Loading 3D model…</p></div>
+</div>
+<p class="viewer-hint">Drag to rotate · Scroll or pinch to zoom · Right-drag or two fingers to pan</p>
 </section>
 <section class="wrap" aria-labelledby="ops-h">
 <h2 id="ops-h">CNC Machining Operations</h2>
