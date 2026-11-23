@@ -237,6 +237,23 @@ html.lab-open { overflow: hidden; }
 .program { margin: 1rem 0 0; padding: 14px 16px; max-height: 32rem; overflow: auto; border: 1px solid var(--line); border-radius: var(--radius); background: var(--code); color: var(--text);
   font: .9rem/1.6 ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; white-space: pre; }
 
+/* About / Contact / Privacy / Disclaimer pages */
+.prose { max-width: 760px; padding-top: 1.75rem; padding-bottom: 1.5rem; }
+.prose h2 { margin-top: 1.75rem; font-size: 1.5rem; }
+.prose p, .prose li { line-height: 1.7; }
+.prose ul { padding-left: 1.3em; }
+.prose li { margin-bottom: .5rem; }
+.prose li::marker { color: var(--copper); }
+.prose b { color: var(--heading); font-weight: 600; }
+.prose a { text-decoration: underline; text-underline-offset: 2px; }
+.prose .lead { color: var(--muted); font-size: 1.08rem; }
+.prose .updated { color: var(--muted); font-size: .85rem; margin-bottom: .5rem; }
+.contact-list { list-style: none; padding: 0 !important; display: grid; gap: 10px; }
+.contact-list li { margin: 0; padding: 12px 16px; background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); }
+.contact-list span { display: block; color: var(--copper-light); font-size: .75rem; font-weight: 600; letter-spacing: .1em; text-transform: uppercase; }
+.footer-links { display: flex; flex-wrap: wrap; justify-content: center; gap: 4px 18px; margin-bottom: 8px; }
+.footer-links a { font-weight: 500; }
+
 /* ==========================================================================
    Ads – clearly labelled, separated from buttons/links, space reserved
    ========================================================================== */
