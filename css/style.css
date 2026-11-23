@@ -187,6 +187,27 @@ p { margin: 0 0 1rem; }
 .viewer-status.error .bar { display: none; }
 .viewer-hint { margin: 8px 0 0; text-align: center; font-size: .8rem; color: var(--muted); }
 
+/* Pneumatics lab (3D lab in an iframe) + Task / How to use boxes */
+.lab-box { position: relative; height: min(70vh, 560px); min-height: 380px; overflow: hidden; border-radius: var(--radius); border: 1px solid var(--line);
+  background: radial-gradient(ellipse at 50% 35%, var(--viewer-glow) 0%, var(--surface) 55%, var(--code) 100%); }
+.lab-box iframe { display: block; width: 100%; height: 100%; border: 0; }
+.lab-box.max { position: fixed; inset: 0; z-index: 200; display: flex; flex-direction: column; height: 100%; min-height: 0; border: 0; border-radius: 0; }
+.lab-box.max iframe { flex: 1; height: auto; }
+.lab-box .close-max { display: none; padding: 10px 14px; border: 0; border-bottom: 1px solid var(--line); background: var(--header-bg); color: var(--heading); font: inherit; font-weight: 600; text-align: right; cursor: pointer; }
+.lab-box.max .close-max { display: block; order: -1; }
+html.lab-open { overflow: hidden; }
+.task, .howto { padding: 14px 18px; background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); }
+.task { border-left: 4px solid var(--copper); }
+.task p:last-child { margin-bottom: 0; }
+.task-title { font-family: var(--font-display); font-weight: 700; font-size: 1.3rem; color: var(--heading); margin-bottom: .5rem; }
+.howto { margin-top: 14px; }
+.howto h3 { margin-bottom: 6px; }
+.howto ol { margin: 0; padding-left: 1.3em; line-height: 1.7; }
+.howto li::marker { color: var(--copper); }
+.howto b, .task b { color: var(--copper-light); font-weight: 600; }
+.howto .viewer-hint { text-align: left; }
+.drawing-narrow { max-width: 560px; margin: 0 auto; }
+
 /* Drawing */
 .drawing { display: block; overflow: hidden; border-radius: var(--radius); border: 1px solid var(--line); background: #fff; }
 .drawing img { width: 100%; }
@@ -276,5 +297,5 @@ p { margin: 0 0 1rem; }
   pre, blockquote { border: 1px solid #999; page-break-inside: avoid; }
   tr, img { page-break-inside: avoid; }
   h2, h3 { page-break-after: avoid; }
-  .site-header, .site-header::after, .banner, .viewer-head, .viewer, .viewer-hint, .menu-btn, .ad { display: none !important; }
+  .site-header, .site-header::after, .banner, .viewer-head, .viewer, .viewer-hint, .lab-box, .menu-btn, .ad { display: none !important; }
 }

@@ -88,6 +88,30 @@
     }, 8000);
   });
 
+  /* ---------- Pneumatics lab (iframe): Full screen and Reset ---------- */
+  var labBox = document.getElementById("lab-box");
+  var lab = document.getElementById("lab");
+  if (labBox && lab) {
+    var enterFull = function () {
+      labBox.classList.add("max");
+      document.documentElement.classList.add("lab-open");
+      try { var p = labBox.requestFullscreen && labBox.requestFullscreen(); if (p && p.catch) p.catch(function () {}); } catch (e) {}
+    };
+    var exitFull = function () {
+      labBox.classList.remove("max");
+      document.documentElement.classList.remove("lab-open");
+      try { if (document.fullscreenElement) document.exitFullscreen(); } catch (e) {}
+    };
+    document.getElementById("btn-lab-full").addEventListener("click", enterFull);
+    document.getElementById("btn-lab-exit").addEventListener("click", exitFull);
+    document.getElementById("btn-lab-reset").addEventListener("click", function () {
+      lab.contentWindow.postMessage({ type: "lab-reset" }, "*");
+    });
+    document.addEventListener("fullscreenchange", function () {
+      if (!document.fullscreenElement && labBox.classList.contains("max")) exitFull();
+    });
+  }
+
   /* ---------- 3D viewer: load Three.js only when the model scrolls near ---------- */
   var scene = document.getElementById("viewer");
   if (!scene) return;

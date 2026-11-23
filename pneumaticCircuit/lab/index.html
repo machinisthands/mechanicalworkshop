@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
+  <title>Pneumatics Lab 3D</title>
+  <link rel="stylesheet" href="css/style.css" />
+  <script type="importmap">
+  {
+    "imports": {
+      "three": "./vendor/three/three.module.min.js",
+      "three/addons/": "./vendor/three/addons/"
+    }
+  }
+  </script>
+</head>
+<body>
+  <div id="app" class="labels-off">
+    <div id="scene"></div>
+
+    <!-- Top bar -->
+    <header id="topbar">
+      <div class="tools">
+        <button id="btnPower" class="power">⏻ OFF</button>
+        <button id="btnParts" class="tog" data-i18n="partsBtn">Parts</button>
+        <button id="btnColors" class="tog" data-i18n-title="tColors">🎨</button>
+        <button id="btnSound" class="tog on" data-i18n-title="tSound">🔊</button>
+        <button id="btnHome" data-i18n-title="tHome">⌂</button>
+        <button id="btnReset" data-i18n-title="tReset">↺</button>
+        <button id="btnHelp" data-i18n-title="tHelp">?</button>
+      </div>
+    </header>
+
+    <!-- Status -->
+    <div id="status">
+      <div class="chip"><b data-i18n="chipTank">Tank</b><span id="stTank">0.0 bar</span></div>
+      <div class="chip"><b data-i18n="chipMotor">Motor</b><span id="stMotor">OFF</span></div>
+      <div class="chip"><b data-i18n="chipReg">FR Out</b><span id="stReg">0.0 bar</span></div>
+      <div class="chip"><b data-i18n="chipCyl">Cylinder</b><span id="stCyl">Retracted</span></div>
+    </div>
+
+    <!-- Parts list -->
+    <nav id="legend">
+      <ol id="legendList">
+        <li data-key="compressor"><i>A</i><span data-name="compressor">Compressor</span></li>
+        <li data-key="fr"><i>B</i><span data-name="fr">FRL (Filter, Regulator, Lubricator)</span></li>
+        <li data-key="slide"><i>C</i><span data-name="slide">Sliding valve</span></li>
+        <li data-key="manifold"><i>D</i><span data-name="manifold">Manifold</span></li>
+        <li data-key="valve"><i>E</i><span data-name="valve">5/2 Lever valve</span></li>
+        <li data-key="cylinder"><i>F</i><span data-name="cylinder">Double acting cylinder</span></li>
+      </ol>
+    </nav>
+
+    <!-- Alarm -->
+    <div id="alarm" class="hidden"></div>
+    <div id="warn" class="hidden"></div>
+
+    <!-- Tube tray -->
+    <div id="tray">
+      <div id="hint">Pick a tube, then tap the ports to connect it</div>
+      <div class="row">
+        <button id="btnUndo" class="hist" data-i18n-title="tUndo" disabled>↶</button>
+        <button id="btnRedo" class="hist" data-i18n-title="tRedo" disabled>↷</button>
+        <button class="tube t10" data-size="10"><i></i><span data-i18n="tube10">10 mm tube</span></button>
+        <button class="tube t4" data-size="4"><i></i><span data-i18n="tube4">4 mm tube</span></button>
+        <button id="btnCancel" class="hidden" data-i18n="cancel">✕ Cancel</button>
+      </div>
+    </div>
+
+    <!-- Info panel -->
+    <aside id="panel" class="hidden">
+      <button id="panelClose">✕</button>
+      <h3 id="pTitle"></h3>
+      <div id="pSub"></div>
+      <p id="pText"></p>
+      <div id="pControls"></div>
+    </aside>
+
+    <div id="tooltip" class="hidden"></div>
+    <div id="toast"></div>
+
+    <!-- Help -->
+    <div id="help" class="overlay hidden">
+      <div class="card">
+        <h2 data-i18n="helpTitle">How to use</h2>
+        <ol>
+          <li data-i18n-html="help1"></li>
+          <li data-i18n-html="help2"></li>
+          <li data-i18n-html="help3"></li>
+          <li data-i18n-html="help4"></li>
+          <li data-i18n-html="help5"></li>
+        </ol>
+        <p class="small" data-i18n="helpSmall"></p>
+        <button id="helpOk" data-i18n="helpOk">Start</button>
+      </div>
+    </div>
+
+    <div id="loading" class="overlay"><div class="spinner"></div></div>
+  </div>
+
+  <script type="module" src="js/main.js"></script>
+</body>
+</html>

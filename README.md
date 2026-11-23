@@ -37,6 +37,8 @@ Pages, styles, scripts, images, models and documents each have one place:
 .
 ├── 1year/<job>/index.html     job pages (latheRook, latheBowl, latheBishop, edmScooter)
 ├── cncLathe/ cncMilling/ cncMillingSub/ toolAndCutterGrinding/   job pages (index.html only)
+├── pneumaticCircuit/          Semester 5 job page; lab/ = the interactive 3D pneumatics lab shown in it
+│                              (own css/js/fonts; Three.js 0.170 copied into lab/vendor/three, MIT)
 ├── css/style.css              the only stylesheet (theme colours at the top)
 ├── fonts/                     Inter + Barlow Condensed (woff2, SIL Open Font License)
 ├── js/
