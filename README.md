@@ -4,7 +4,7 @@ Study site for TKMCE mechanical workshop jobs, grouped by semester. Each job pag
 interactive 3D model, the engineering drawing, a process guide, a machining video and
 (where available) sample / model questions.
 
-**Live site:** https://machinisthands.github.io/tkmceworkshop/
+**Live site:** https://machinisthands.github.io/mechanicalworkshop/
 
 ![Site preview](doc/preview.png)
 
