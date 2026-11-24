@@ -434,3 +434,10 @@ html.sheet-open { overflow: hidden; }
 .part-svg text { fill: var(--heading); font-size: 13px; text-anchor: middle; font-family: inherit; }
 .part-fig figcaption { margin-top: 8px; font-size: .85rem; color: var(--muted); }
 .program { margin: 0; padding: 14px 16px; background: var(--code); color: var(--heading); border: 1px solid var(--line); border-radius: var(--radius); overflow-x: auto; font-size: .9rem; line-height: 1.6; }
+/* milling notes: card sub-lists, engraved outline, own arrow marker */
+.step-card li ul { margin: 4px 0 2px; padding-left: 1.1em; list-style: disc; }
+.part-svg .part rect { fill: var(--surface-2); }
+.part-svg .part .engrave { stroke: var(--copper-light); stroke-width: 2.5; }
+.part-svg .dims.mill .dim { marker-start: url(#arm); marker-end: url(#arm); }
+.part-svg .dims .lead { stroke: var(--copper-light); stroke-width: 1; }
+.codes code { white-space: nowrap; }
