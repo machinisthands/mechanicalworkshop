@@ -328,9 +328,9 @@
     /* Tools as on the machine (insert shapes from the holder codes):
      *  T1 PCLNR 2020 K12 – 95° holder, CNMG 1204 insert (80° rhombic, 12.7 mm IC)
      *  T7 MVJNR 2020 K16 – 93° holder, VNMG 1604 insert (35° rhombic, 9.525 mm IC)
-     *  T3 CFIR 2020 K06 – Seco MDT parting/grooving holder, LC..1606 insert, 6 mm wide
+     *  T3 CFIR 2020 K06 – Seco MDT parting/grooving holder; parting width taken as 3 mm (see PART_W)
      *  T4 sleeve (stopper) – black, its face 1 mm past its Z0 */
-    const PART_W = 6;
+    const PART_W = 3;   // parting width: the Rook and Bowl drawings (35 mm) come out right only with 3 mm, reference on the left edge
     const holderM = new T.MeshStandardMaterial({ color: 0x2a2a2e, metalness: 0.5, roughness: 0.5 });
     function rhombicInsert(kappaDeg, cornerDeg, ic, m) {
       const k = kappaDeg * Math.PI / 180, c = cornerDeg * Math.PI / 180, L = ic / Math.sin(c);
@@ -346,9 +346,9 @@
         // insert at the tip, a thin blade (narrower than the insert) going up to a 20 × 20 shank on its right
         // CFIR (Seco MDT) parting holder, as in the photo: a straight 20 × 20 shank, a head block at its end and a thin
         // blade plate on the head's left side, deeper than the shank, with the 6 mm insert at its tip (max. cut depth 18 mm)
-        const x0 = -PART_W + 0.6;                                    // left side of blade, head and shank (flush)
-        const ins = new T.Mesh(new T.BoxGeometry(PART_W, 14, 5), m); ins.position.set(-PART_W / 2, 7, -2.5); g.add(ins);
-        const blade = new T.Mesh(new T.BoxGeometry(PART_W - 1.2, 20, 28), holderM); blade.position.set(-PART_W / 2, 4 + 10, -14 - 1); g.add(blade);
+        const x0 = 0.3;                                              // left side of blade, head and shank (flush with the reference edge)
+        const ins = new T.Mesh(new T.BoxGeometry(PART_W, 14, 5), m); ins.position.set(PART_W / 2, 7, -2.5); g.add(ins);
+        const blade = new T.Mesh(new T.BoxGeometry(PART_W - 0.6, 20, 28), holderM); blade.position.set(PART_W / 2, 4 + 10, -14 - 1); g.add(blade);
         const head = new T.Mesh(new T.BoxGeometry(20, 18, 20), holderM); head.position.set(x0 + 10, 24 + 9, -10); g.add(head);
         const shank = new T.Mesh(new T.BoxGeometry(20, 60, 20), holderM); shank.position.set(x0 + 10, 42 + 30, -10); g.add(shank);
         const screw = new T.Mesh(new T.CylinderGeometry(3, 3, 1.5, 20), new T.MeshStandardMaterial({ color: 0x111114, metalness: 0.6, roughness: 0.4 }));
@@ -385,7 +385,7 @@
     function cut(tool, q) {                           // remove material at the tool tip q = {z, r}
       if (tool === 4 || tool === 0) return;
       let a, b;
-      if (tool === 3) { a = q.z - PART_W; b = q.z; }            // 6 mm parting blade (CFIR 2020 K06), reference on its right edge
+      if (tool === 3) { a = q.z; b = q.z + PART_W; }            // parting blade, reference on its LEFT edge: it cuts from Z to Z + width
       else { a = q.z; b = q.z + (tool === 1 ? 1.5 : 0.12); }   // facing tool clears the face; the profile tool cuts at its tip
       const k0 = Math.max(0, kOf(b)), k1 = Math.min(N - 1, kOf(a));
       for (let k = k0; k <= k1; k++) if (mat[k] > q.r) { mat[k] = Math.max(q.r, 0); dirty = true; }
