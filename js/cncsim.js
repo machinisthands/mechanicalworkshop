@@ -180,8 +180,8 @@
     <div class="sim-view" id="sim-view"><p class="sim-msg">Loading the simulation…</p></div>
     <div class="sim-bar" role="toolbar" aria-label="Simulation controls">
       <button type="button" class="sim-btn sim-play" aria-pressed="false">▶ Play</button>
-      <button type="button" class="sim-btn sim-step" title="Run one block">Single block</button>
-      <button type="button" class="sim-btn sim-reset">⟲ Reset</button>
+      <button type="button" class="sim-btn sim-home" title="Back to the starting view – the program keeps running">⌖ View</button>
+      <button type="button" class="sim-btn sim-reset" title="Start the program again">⟲ Reset</button>
       <label class="sim-speed">Speed <select><option value="1">1×</option><option value="3" selected>3×</option><option value="8">8×</option><option value="20">20×</option></select></label>
     </div>
     <div class="sim-dro" aria-live="off"><span>X <b class="d-x">–</b></span><span>Z <b class="d-z">–</b></span><span class="d-t">T–</span><span class="d-s"></span><span class="d-f"></span><span class="d-msg"></span></div>
@@ -269,12 +269,12 @@
     const dl = new T.DirectionalLight(0xffffff, 1.4); dl.position.set(20, 40, 30); scene.add(dl);
     const camera = new T.PerspectiveCamera(30, 1, 0.1, 2000);
     const midZ = (PART_Z + 2) / 2;
-    camera.position.set(midZ + 11, 12 + STOCK_R, 112 + STOCK_R * 3.8);
+    camera.position.set(midZ + 62, 16 + STOCK_R, 96 + STOCK_R * 3.2);   // from the tailstock side: the bar face and the stopper face us
     const controls = new X.OrbitControls(camera, renderer.domElement);
-    controls.target.set(midZ + 9, 8, 0); controls.enableDamping = true; controls.update(); controls.saveState();
+    controls.target.set(midZ + 4, 6, 0); controls.enableDamping = true; controls.update(); controls.saveState();
 
     // world: X = machine Z (to the right), Y = radius (up)
-    const steel = new T.MeshStandardMaterial({ color: 0xc4c9ce, metalness: 0.9, roughness: 0.32 });
+    const steel = new T.MeshStandardMaterial({ color: 0xffffff, vertexColors: true, metalness: 0.9, roughness: 0.32 });
     // Three-jaw chuck: body behind the bar, three stepped jaws 120° apart gripping it. It turns with the spindle.
     const chuckM = new T.MeshStandardMaterial({ color: 0x3a3a40, metalness: 0.6, roughness: 0.45 });
     const jawM = new T.MeshStandardMaterial({ color: 0x8d939a, metalness: 0.8, roughness: 0.35 });
@@ -306,11 +306,19 @@
     resetMat();
     const spin = new T.Group(); scene.add(spin); spin.add(chuck);
     function rebuild() {
-      const pts = [new T.Vector2(0, ZTOP)];
-      for (let k = 0; k < N; k += 3) pts.push(new T.Vector2(Math.max(mat[k], 0.001), zOf(k)));
-      pts.push(new T.Vector2(0, STOCK_Z_END));
+      // LatheGeometry wants the profile from bottom to top; the other way round it is drawn inside out
+      const pts = [new T.Vector2(0, STOCK_Z_END)];
+      for (let k = N - 1; k >= 0; k -= 3) pts.push(new T.Vector2(Math.max(mat[k], 0.001), zOf(k)));
+      pts.push(new T.Vector2(0, ZTOP));
       const g = new T.LatheGeometry(pts, 40); g.rotateZ(-Math.PI / 2);   // axis along world X
       g.computeVertexNormals();
+      // faces (square to the axis) in a darker, bluish steel so the end face and shoulders stand out from the turned diameter
+      const nrm = g.attributes.normal, col = new Float32Array(nrm.count * 3);
+      for (let v = 0; v < nrm.count; v++) {
+        const f = Math.min(1, Math.max(0, (Math.abs(nrm.getX(v)) - 0.55) / 0.35));
+        col[v * 3] = 0.77 - 0.30 * f; col[v * 3 + 1] = 0.79 - 0.24 * f; col[v * 3 + 2] = 0.81 - 0.10 * f;
+      }
+      g.setAttribute('color', new T.BufferAttribute(col, 3));
       if (part) { part.geometry.dispose(); part.geometry = g; } else { part = new T.Mesh(g, steel); spin.add(part); }
       dirty = false;
     }
@@ -442,7 +450,7 @@
     }
     function setPlay(on) { playing = on; $('.sim-play').textContent = on ? '❚❚ Pause' : '▶ Play'; $('.sim-play').setAttribute('aria-pressed', String(on)); }
     $('.sim-play').addEventListener('click', () => { if (pulling) return; if (idx >= MOVES.length) reset(); setPlay(!playing); if (playing) dro.m.textContent = ''; });
-    $('.sim-step').addEventListener('click', () => { if (idx >= MOVES.length) reset(); setPlay(false); stepTo = idx; dro.m.textContent = ''; let r = ''; let guard = 0; while (stepTo >= 0 && guard++ < 100000) { r = advance(0.5); if (r) break; } stepTo = -1; if (dirty) rebuild(); });
+    $('.sim-home').addEventListener('click', () => controls.reset());   // only the view; the simulation goes on where it is
     $('.sim-reset').addEventListener('click', reset);
     $('.sim-speed select').addEventListener('change', (e) => { speedF = +e.target.value; });
 
