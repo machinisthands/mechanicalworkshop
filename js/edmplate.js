@@ -60,9 +60,7 @@
     const camera = new T.PerspectiveCamera(32, 16 / 9, 1, 500);
     const sc = Math.max(LEN, W * 1.6) / 40;
     camera.position.set(38 * sc, 46 * sc, 66 * sc);
-    const controls = new X.OrbitControls(camera, renderer.domElement);
-    controls.target.set(6 * sc, 0, 0); controls.enableDamping = true; controls.enablePan = false;
-    controls.minDistance = 20; controls.maxDistance = 200; controls.update();
+    camera.lookAt(6 * sc, 0, 0);   // a fixed view: it plays like a video, the page scrolls over it
 
     function size() {
       const w = host.clientWidth, h = Math.round(w * (w < 560 ? 0.75 : 0.5));
@@ -73,7 +71,7 @@
 
     // timeline: for each piece the wire crosses the width (2 s), then the piece moves away (0.8 s)
     const still = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-    const CROSS = 3.2, MOVE = 0.9, STEP = CROSS + MOVE, HOLD = 3;
+    const CROSS = Math.max(1.4, W * 0.15), MOVE = 0.6, STEP = CROSS + MOVE, HOLD = 2.5;   // the wire speed is the same for both models
     const gap = Math.max(1.2, P / 2), shift = (k) => gap * (N - k);                       // final gap of 2 mm between pieces
     function pose(t) {
       for (let k = 0; k < N; k++) {
@@ -92,7 +90,7 @@
       const v = Math.min(1, Math.max(0, (t - CROSS - MOVE) / 0.4));
       tag.style.opacity = v;
       if (v > 0) {
-        const p = new T.Vector3(pieces[0].position.x, TH / 2 + 1, 0).project(camera);
+        const p = new T.Vector3(pieces[0].position.x, TH / 2 + 3, 0).project(camera);
         const hw = tag.offsetWidth / 2 + 6; tag.style.left = Math.min(host.clientWidth - hw, Math.max(hw, (p.x + 1) / 2 * host.clientWidth)) + 'px';
         tag.style.top = ((1 - p.y) / 2 * host.clientHeight) + 'px';
       }
@@ -103,7 +101,7 @@
       requestAnimationFrame(loop);
       if (!on) return;
       if (!still) { t += Math.min(0.05, (now - last) / 1000); if (t > N * STEP + HOLD) t = 0; }
-      last = now; pose(t); controls.update(); renderer.render(scene, camera);
+      last = now; pose(t); renderer.render(scene, camera);
     })(last);
   }
 
