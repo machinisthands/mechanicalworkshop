@@ -121,14 +121,14 @@ p { margin: 0 0 1rem; }
 .banner picture { display: contents; }
 .banner img { display: none; width: 100%; aspect-ratio: 1224 / 455; object-fit: cover; }
 .banner img.on { display: block; }
-.dots { display: flex; justify-content: center; gap: 2px; padding: 6px; }
-/* 24 px touch target, 10 px visible dot */
-.dot { position: relative; width: 24px; height: 24px; padding: 0; border: 0; border-radius: 12px; background: none; cursor: pointer; transition: width .2s; }
-.dot::before { content: ""; position: absolute; left: 50%; top: 50%; width: 10px; height: 10px; transform: translate(-50%, -50%);
-  border-radius: 5px; background: var(--line-strong); transition: width .2s, background-color .2s; }
+.dots { display: flex; justify-content: center; gap: 0; padding: 2px; }
+/* 18 px touch target, 6 px visible dot */
+.dot { position: relative; width: 18px; height: 18px; padding: 0; border: 0; border-radius: 12px; background: none; cursor: pointer; transition: width .2s; }
+.dot::before { content: ""; position: absolute; left: 50%; top: 50%; width: 6px; height: 6px; transform: translate(-50%, -50%);
+  border-radius: 3px; background: var(--line-strong); transition: width .2s, background-color .2s; }
 .dot:hover::before { background: var(--copper-light); }
-.dot[aria-current="true"] { width: 34px; }
-.dot[aria-current="true"]::before { width: 26px; background: var(--brand); }
+.dot[aria-current="true"] { width: 26px; }
+.dot[aria-current="true"]::before { width: 16px; background: var(--brand); }
 
 /* ==========================================================================
    Home
@@ -155,7 +155,7 @@ p { margin: 0 0 1rem; }
    ========================================================================== */
 
 .job > section, .job > header { padding-top: 1.25rem; padding-bottom: 1.25rem; }
-.job > header { padding-top: 1.25rem; padding-bottom: .25rem; }
+.job > header { padding-top: .5rem; padding-bottom: .25rem; }
 .job > header + section { padding-top: .75rem; }
 .job .intro p:last-child { margin-bottom: 0; }
 .job > .wrap { max-width: 920px; }
