@@ -417,74 +417,8 @@ html.sheet-open { overflow: hidden; }
 .codes dt { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-weight: 700; color: var(--copper-light); background: var(--surface-2); }
 .codes code { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: .85em; color: var(--heading); white-space: nowrap; }
 .notes .program { margin: 0; max-height: none; }
-/* ==== CNC simulation ==== */
-.sim { margin-top: 12px; display: grid; gap: 10px; }
-.sim-view { position: relative; height: clamp(260px, 56vw, 460px); border: 1px solid var(--line); border-radius: var(--radius);
-  background: radial-gradient(ellipse at 50% 35%, var(--viewer-glow, #3a3439) 0%, var(--surface) 55%, var(--code) 100%); overflow: hidden; touch-action: none; }
-.sim-view canvas { display: block; width: 100%; height: 100%; }
-.sim-msg { position: absolute; inset: 0; display: grid; place-items: center; margin: 0; color: var(--muted); }
-.sim-lost { position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); z-index: 2; background: var(--surface); }
-.sim-bar { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
-.sim-btn { min-height: 40px; padding: 0 14px; border: 1px solid var(--line); border-radius: 999px; background: var(--surface); color: var(--heading); font: inherit; font-weight: 600; cursor: pointer; }
-.sim-btn:hover { border-color: var(--line-strong); }
-.sim-play { background: var(--copper); border-color: var(--copper); color: var(--on-copper); }
-.sim-speed { margin-left: auto; display: inline-flex; align-items: center; gap: 6px; color: var(--muted); font-size: .9rem; }
-.sim-speed select { min-height: 36px; border: 1px solid var(--line); border-radius: 8px; background: var(--surface); color: var(--heading); font: inherit; padding: 0 6px; }
-.sim-dro { display: flex; flex-wrap: wrap; gap: 6px 16px; padding: 8px 12px; border: 1px solid var(--line); border-radius: var(--radius); background: var(--code);
-  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: .9rem; color: var(--muted); }
-.sim-dro b { color: var(--heading); font-weight: 700; display: inline-block; min-width: 7ch; }
-.sim-dro .d-msg { flex-basis: 100%; color: var(--copper-light); }
-.sim-dro .d-msg:empty { display: none; }
-.sim-cols { display: grid; gap: 10px; }
-@media (min-width: 760px) { .sim-cols { grid-template-columns: 1fr 1fr; } }
-.sim-code { margin: 0; padding: 6px 0; max-height: 320px; overflow: auto; list-style: none; counter-reset: ln; border: 1px solid var(--line); border-radius: var(--radius); background: var(--code);
-  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: .85rem; line-height: 1.55; position: relative; }
-.sim-code li { counter-increment: ln; padding: 0 10px 0 0; white-space: pre; color: var(--text); border-left: 3px solid transparent; }
-.sim-code li::before { content: counter(ln); display: inline-block; width: 3.2ch; margin-right: 1ch; text-align: right; color: var(--muted); opacity: .6; }
-.sim-code li.is-note { color: var(--muted); }
-.sim-code li.is-seg { cursor: pointer; color: var(--copper-light); }
-.sim-code li.picked { background: rgba(127, 179, 255, .16); border-left-color: #7fb3ff; }
-.sim-code li.run { background: var(--copper-tint); border-left-color: var(--brand); color: var(--heading); }
-.sim-prof { margin: 0; padding: 8px; border: 1px solid var(--line); border-radius: var(--radius); background: var(--surface); }
-.sim-svg { display: block; width: 100%; height: auto; max-height: 300px; }
-.sim-svg .axis { stroke: var(--muted); stroke-width: calc(var(--sw) * .5); stroke-dasharray: calc(var(--sw) * 8) calc(var(--sw) * 3); }
-.sim-svg .mirror { fill: none; stroke: var(--line-strong); stroke-width: calc(var(--sw) * .8); }
-.sim-svg .seg { fill: none; stroke: var(--copper-light); stroke-width: var(--sw); stroke-linecap: round; stroke-linejoin: round; pointer-events: none; }
-.sim-svg .seg.on { stroke: #7fb3ff; stroke-width: calc(var(--sw) * 2.4); }
-.sim-svg .seg.run { stroke: var(--brand); stroke-width: calc(var(--sw) * 2.4); }
-.sim-svg .hit { fill: none; stroke: transparent; stroke-width: calc(var(--sw) * 8); cursor: pointer; }
-.sim-prof figcaption { margin-top: 6px; font-size: .8rem; color: var(--muted); }
-@media print { .sim { display: none; } .sim + pre, pre.program[hidden] { display: block !important; } }
 /* ==== Front page: notes under the group headings ==== */
 .group-note { max-width: 760px; margin: -4px 0 14px; color: var(--text); font-size: .95rem; line-height: 1.55; }
-
-/* ==== Viva questions ==== */
-.viva { display: grid; gap: 12px; }
-.viva-q { margin: 0; padding: 12px 16px 14px; background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); }
-.viva-q legend { float: left; width: 100%; padding: 0; margin-bottom: 8px; color: var(--heading); font-weight: 600; line-height: 1.45; }
-.viva-q legend + * { clear: both; }
-.viva-n { color: var(--copper-light); }
-.viva-q code { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: .9em; }
-.viva-q label { display: flex; align-items: flex-start; gap: 10px; padding: 8px 10px; margin-top: 6px; border: 1px solid var(--line); border-radius: 8px; cursor: pointer; line-height: 1.4; }
-.viva-q label:hover { border-color: var(--line-strong); }
-.viva-q input { accent-color: var(--copper); width: 18px; height: 18px; margin: 1px 0 0; flex: none; }
-.viva-q label:has(input:checked) { border-color: var(--copper); background: var(--copper-tint); }
-.viva-q.is-right { border-left: 4px solid #3FB950; }
-.viva-q.is-wrong { border-left: 4px solid #E5484D; }
-.viva-q label.viva-correct, .viva-q label.viva-correct:has(input:checked) { border-color: #3FB950; background: rgba(63, 185, 80, .12); }
-.viva-q label.viva-correct::after { content: "✓"; margin-left: auto; color: #3FB950; font-weight: 700; }
-.viva-q label.viva-picked-wrong, .viva-q label.viva-picked-wrong:has(input:checked) { border-color: #E5484D; background: rgba(229, 72, 77, .12); }
-.viva-q label.viva-picked-wrong::after { content: "✗"; margin-left: auto; color: #E5484D; font-weight: 700; }
-.viva-why { margin: 10px 0 0; font-size: .9rem; color: var(--muted); }
-.viva-bar { display: flex; gap: 10px; }
-.viva-submit, .viva-again { min-height: 44px; padding: 0 22px; border-radius: 999px; font: inherit; font-weight: 600; cursor: pointer; }
-.viva-submit { border: 0; background: var(--copper); color: var(--on-copper); }
-.viva-again { border: 1px solid var(--copper); background: none; color: var(--copper-light); }
-.viva-score { margin: 0; padding: 12px 16px; border-radius: var(--radius); background: var(--copper-tint); border: 1px solid var(--copper); color: var(--heading); font-size: 1.05rem; }
-.viva-score b { font-size: 1.25rem; color: var(--copper-light); }
-.viva-score.viva-warn { background: rgba(229, 72, 77, .1); border-color: #E5484D; }
-@media print { .viva-bar { display: none; } }
-
 /* ==== Wire EDM parameters and experiment ==== */
 .edm-table { width: 100%; border-collapse: collapse; background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); overflow: hidden; font-size: .95rem; }
 .edm-table th, .edm-table td { padding: 7px 12px; border-top: 1px solid var(--line); text-align: left; }
@@ -526,7 +460,71 @@ html.sheet-open { overflow: hidden; }
 .edm-task p { margin: 0 0 10px; }
 .edm-task .edm-fig { margin: 0; }
 @media (max-width: 560px) { .edm-pair { grid-template-columns: 1fr; } }
+/* ==== CNC simulation ==== */
+.sim { margin-top: 12px; display: grid; gap: 10px; }
+.sim-view { position: relative; height: clamp(260px, 56vw, 460px); border: 1px solid var(--line); border-radius: var(--radius);
+  background: radial-gradient(ellipse at 50% 35%, var(--viewer-glow, #3a3439) 0%, var(--surface) 55%, var(--code) 100%); overflow: hidden; touch-action: none; }
+.sim-view canvas { display: block; width: 100%; height: 100%; }
+.sim-msg { position: absolute; inset: 0; display: grid; place-items: center; margin: 0; color: var(--muted); }
+.sim-lost { position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); z-index: 2; background: var(--surface); }
+.sim-bar { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+.sim-btn { min-height: 40px; padding: 0 14px; border: 1px solid var(--line); border-radius: 999px; background: var(--surface); color: var(--heading); font: inherit; font-weight: 600; cursor: pointer; }
+.sim-btn:hover { border-color: var(--line-strong); }
+.sim-play { background: var(--copper); border-color: var(--copper); color: var(--on-copper); }
+.sim-speed { margin-left: auto; display: inline-flex; align-items: center; gap: 6px; color: var(--muted); font-size: .9rem; }
+.sim-speed select { min-height: 36px; border: 1px solid var(--line); border-radius: 8px; background: var(--surface); color: var(--heading); font: inherit; padding: 0 6px; }
+.sim-dro { display: flex; flex-wrap: wrap; gap: 6px 16px; padding: 8px 12px; border: 1px solid var(--line); border-radius: var(--radius); background: var(--code);
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: .9rem; color: var(--muted); }
+.sim-dro b { color: var(--heading); font-weight: 700; display: inline-block; min-width: 7ch; }
+.sim-dro .d-msg { flex-basis: 100%; color: var(--copper-light); }
+.sim-dro .d-msg:empty { display: none; }
+.sim-cols { display: grid; gap: 10px; }
+@media (min-width: 760px) { .sim-cols { grid-template-columns: 1fr 1fr; } }
+.sim-code { margin: 0; padding: 6px 0; max-height: 320px; overflow: auto; list-style: none; counter-reset: ln; border: 1px solid var(--line); border-radius: var(--radius); background: var(--code);
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: .85rem; line-height: 1.55; position: relative; }
+.sim-code li { counter-increment: ln; padding: 0 10px 0 0; white-space: pre; color: var(--text); border-left: 3px solid transparent; }
+.sim-code li::before { content: counter(ln); display: inline-block; width: 3.2ch; margin-right: 1ch; text-align: right; color: var(--muted); opacity: .6; }
+.sim-code li.is-note { color: var(--muted); }
+.sim-code li.is-seg { cursor: pointer; color: var(--copper-light); }
+.sim-code li.picked { background: rgba(127, 179, 255, .16); border-left-color: #7fb3ff; }
+.sim-code li.run { background: var(--copper-tint); border-left-color: var(--brand); color: var(--heading); }
+.sim-prof { margin: 0; padding: 8px; border: 1px solid var(--line); border-radius: var(--radius); background: var(--surface); }
+.sim-svg { display: block; width: 100%; height: auto; max-height: 300px; }
+.sim-svg .axis { stroke: var(--muted); stroke-width: calc(var(--sw) * .5); stroke-dasharray: calc(var(--sw) * 8) calc(var(--sw) * 3); }
+.sim-svg .mirror { fill: none; stroke: var(--line-strong); stroke-width: calc(var(--sw) * .8); }
+.sim-svg .seg { fill: none; stroke: var(--copper-light); stroke-width: var(--sw); stroke-linecap: round; stroke-linejoin: round; pointer-events: none; }
+.sim-svg .seg.on { stroke: #7fb3ff; stroke-width: calc(var(--sw) * 2.4); }
+.sim-svg .seg.run { stroke: var(--brand); stroke-width: calc(var(--sw) * 2.4); }
+.sim-svg .hit { fill: none; stroke: transparent; stroke-width: calc(var(--sw) * 8); cursor: pointer; }
+.sim-prof figcaption { margin-top: 6px; font-size: .8rem; color: var(--muted); }
+@media print { .sim { display: none; } .sim + pre, pre.program[hidden] { display: block !important; } }
 
 /* ==== Coolant ==== */
 .cool-list { padding-left: 1.2em; list-style: disc; }
 .cool-list li { margin-bottom: 4px; }
+/* ==== Viva questions ==== */
+.viva { display: grid; gap: 12px; }
+.viva-q { margin: 0; padding: 12px 16px 14px; background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); }
+.viva-q legend { float: left; width: 100%; padding: 0; margin-bottom: 8px; color: var(--heading); font-weight: 600; line-height: 1.45; }
+.viva-q legend + * { clear: both; }
+.viva-n { color: var(--copper-light); }
+.viva-q code { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: .9em; }
+.viva-q label { display: flex; align-items: flex-start; gap: 10px; padding: 8px 10px; margin-top: 6px; border: 1px solid var(--line); border-radius: 8px; cursor: pointer; line-height: 1.4; }
+.viva-q label:hover { border-color: var(--line-strong); }
+.viva-q input { accent-color: var(--copper); width: 18px; height: 18px; margin: 1px 0 0; flex: none; }
+.viva-q label:has(input:checked) { border-color: var(--copper); background: var(--copper-tint); }
+.viva-q.is-right { border-left: 4px solid #3FB950; }
+.viva-q.is-wrong { border-left: 4px solid #E5484D; }
+.viva-q label.viva-correct, .viva-q label.viva-correct:has(input:checked) { border-color: #3FB950; background: rgba(63, 185, 80, .12); }
+.viva-q label.viva-correct::after { content: "✓"; margin-left: auto; color: #3FB950; font-weight: 700; }
+.viva-q label.viva-picked-wrong, .viva-q label.viva-picked-wrong:has(input:checked) { border-color: #E5484D; background: rgba(229, 72, 77, .12); }
+.viva-q label.viva-picked-wrong::after { content: "✗"; margin-left: auto; color: #E5484D; font-weight: 700; }
+.viva-why { margin: 10px 0 0; font-size: .9rem; color: var(--muted); }
+.viva-bar { display: flex; gap: 10px; }
+.viva-submit, .viva-again { min-height: 44px; padding: 0 22px; border-radius: 999px; font: inherit; font-weight: 600; cursor: pointer; }
+.viva-submit { border: 0; background: var(--copper); color: var(--on-copper); }
+.viva-again { border: 1px solid var(--copper); background: none; color: var(--copper-light); }
+.viva-score { margin: 0; padding: 12px 16px; border-radius: var(--radius); background: var(--copper-tint); border: 1px solid var(--copper); color: var(--heading); font-size: 1.05rem; }
+.viva-score b { font-size: 1.25rem; color: var(--copper-light); }
+.viva-score.viva-warn { background: rgba(229, 72, 77, .1); border-color: #E5484D; }
+@media print { .viva-bar { display: none; } }

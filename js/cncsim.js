@@ -301,7 +301,9 @@
     const zOf = (k) => ZTOP - k * DZ, kOf = (z) => Math.round((ZTOP - z) / DZ);
     // The bar starts short inside the chuck. At the M00 after the stopper it is pulled out against the sleeve,
     // whose face is 1 mm past Z0 – so the bar face sits at Z+1 and the facing pass takes that 1 mm off.
-    const FACE0 = -20, SLEEVE = 1;
+    // A program without the sleeve (T4) starts with the bar already out: its face at Z0, where the contour begins.
+    const hasSleeve = MOVES.some((m) => m.tool === 4);
+    const FACE0 = hasSleeve ? -20 : 0, SLEEVE = 1;
     let face = FACE0, pulling = false;
     function fillTo(z) { for (let k = 0; k < N; k++) if (zOf(k) <= z && mat[k] === 0) mat[k] = STOCK_R; dirty = true; }
     function resetMat() { mat = new Float32Array(N); face = FACE0; pulling = false; fillTo(FACE0); }
