@@ -120,54 +120,6 @@
 <h2 id="drawing-h">Engineering Drawing</h2>
 <a class="drawing" href="../img/jobs/cncLathe/drawing-full.jpg" target="_blank" rel="noopener"><img src="../img/jobs/cncLathe/drawing.webp" srcset="../img/jobs/cncLathe/drawing-900.webp 900w, ../img/jobs/cncLathe/drawing.webp 1800w" sizes="(min-width: 960px) 890px, 100vw" alt="Engineering drawing of CNC Lathe" width="1800" height="1273" loading="lazy" decoding="async"></a>
 </section>
-<!-- cnc-notes -->
-<section class="wrap notes" aria-labelledby="notes-h">
-<h2 id="notes-h">Operating Notes &amp; Programming</h2>
-<p class="notes-lead">CNC – <b>Computer Numerical Control</b>. Working on the CNC lathe has four stages:</p>
-<ol class="stages"><li>Machine instruction</li><li>Tooling</li><li>Program entry</li><li>Manufacturing</li></ol>
-
-<h3>Operating the machine</h3>
-<div class="step-grid">
-<div class="step-card"><h4>Machine ON</h4><ol><li>Main panel ON</li><li>Stabilizer ON</li><li>Press the Start button</li><li>Machine main power ON</li></ol></div>
-<div class="step-card"><h4>Running setup</h4><ol><li>Emergency ON (release the emergency button)</li><li>Press Reset</li></ol></div>
-<div class="step-card"><h4>Tool offset – X axis</h4><ol><li>Jog</li><li>Bring the tool to position (X axis)</li><li>Measure tool</li><li>Measure manual</li><li>Enter the diameter → Save position → Length 1</li><li>Back (twice)</li></ol></div>
-<div class="step-card"><h4>Tool offset – Z axis</h4><ol><li>Bring the tool to position (Z axis)</li><li>Measure tool</li><li>Measure manual</li><li>Enter zero → Length 2</li><li>Back (twice)</li></ol></div>
-<div class="step-card"><h4>New program</h4><ol><li>Program manager</li><li>New</li><li>Enter any name</li><li>Input</li><li>Enter the program</li></ol></div>
-<div class="step-card"><h4>Simulation</h4><ol><li>MEM</li><li>Close the door</li><li>Simulation</li><li>Keep a hand on Reset and press Cycle Start</li></ol><p class="note-warn">⚠ Important: if the machine moves, press Reset.</p></div>
-<div class="step-card"><h4>Running the program</h4><ol><li>MEM</li><li>Close the door</li><li>Single block</li><li>Keep a hand on Reset and press Cycle Start</li></ol><p class="note-warn">⚠ Important: if there is any movement that is not in the program, press Reset.</p></div>
-</div>
-
-<h3>Preparatory functions (G codes)</h3>
-<dl class="codes"><dt>G00</dt><dd>Rapid positioning<br><code>G00 X10 Y10</code> · <code>G00 Z10</code></dd><dt>G01</dt><dd>Linear interpolation<br><code>G01 X10 Y10 F100</code></dd><dt>G02</dt><dd>Circular interpolation, clockwise (CW)<br><code>G01 X0 Y0</code> → <code>G02 X10 Y0 R5</code></dd><dt>G03</dt><dd>Circular interpolation, counter-clockwise (CCW)<br><code>G01 X0 Y0</code> → <code>G03 X10 Y0 R5</code></dd><dt>G70</dt><dd>Dimensions in inch</dd><dt>G71</dt><dd>Dimensions in mm</dd><dt>G75</dt><dd>Home position</dd></dl>
-
-<h3>Miscellaneous functions (M codes)</h3>
-<dl class="codes"><dt>M03</dt><dd>Spindle clockwise (CW)</dd><dt>M04</dt><dd>Spindle counter-clockwise (CCW)</dd><dt>M05</dt><dd>Spindle stop</dd><dt>M06</dt><dd>Tool change (<code>T1 M06</code>)</dd><dt>M08</dt><dd>Coolant ON</dd><dt>M09</dt><dd>Coolant OFF</dd><dt>M30</dt><dd>Program end and reset</dd></dl>
-
-<h3>Other words</h3>
-<dl class="codes"><dt>T</dt><dd>Tool selection</dd><dt>S</dt><dd>Spindle speed in rpm</dd><dt>F</dt><dd>Feed in mm/rev</dd><dt>CR</dt><dd>Radius of circle</dd><dt>D</dt><dd>Offset number</dd><dt>CYCLE95</dt><dd>Stock removal (roughing) cycle</dd></dl>
-
-<h3>Example program</h3>
-<figure class="part-fig"><svg class="part-svg" viewBox="80 30 490 270" role="img" aria-label="Example part for the program: diameters 10, 15, 25, 30 and 40 mm, lengths 10, 15 and 15 mm, R2 fillet"><defs><marker id="ar" viewBox="0 0 10 10" refX="10" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0 10 5 0 10z" /></marker></defs><line class="axis" x1="130" y1="150" x2="440" y2="150" /><g class="part"><path d="M 420 125 L 370 112.5 L 305 112.5 A 10 10 0 0 1 295 102.5 L 295 87.5 L 220 75 L 220 50 L 145 50" /><path d="M 420 175 L 370 187.5 L 305 187.5 A 10 10 0 0 0 295 197.5 L 295 212.5 L 220 225 L 220 250 L 145 250" /><line x1="420" y1="125" x2="420" y2="175" /><line x1="145" y1="50" x2="145" y2="250" /><line x1="370" y1="112.5" x2="370" y2="187.5" class="thin" /><line x1="295" y1="87.5" x2="295" y2="212.5" /><line x1="220" y1="50" x2="220" y2="250" /></g><g class="dims"><line class="ext" x1="422" y1="125.0" x2="451" y2="125.0" /><line class="ext" x1="422" y1="175.0" x2="451" y2="175.0" /><line class="dim" x1="445" y1="125.0" x2="445" y2="175.0" /><text x="439" y="150" transform="rotate(-90 439 150)">Ø10</text><line class="ext" x1="372" y1="112.5" x2="481" y2="112.5" /><line class="ext" x1="372" y1="187.5" x2="481" y2="187.5" /><line class="dim" x1="475" y1="112.5" x2="475" y2="187.5" /><text x="469" y="150" transform="rotate(-90 469 150)">Ø15</text><line class="ext" x1="297" y1="87.5" x2="511" y2="87.5" /><line class="ext" x1="297" y1="212.5" x2="511" y2="212.5" /><line class="dim" x1="505" y1="87.5" x2="505" y2="212.5" /><text x="499" y="150" transform="rotate(-90 499 150)">Ø25</text><line class="ext" x1="222" y1="75.0" x2="541" y2="75.0" /><line class="ext" x1="222" y1="225.0" x2="541" y2="225.0" /><line class="dim" x1="535" y1="75.0" x2="535" y2="225.0" /><text x="529" y="150" transform="rotate(-90 529 150)">Ø30</text><line class="ext" x1="143" y1="50.0" x2="121" y2="50.0" /><line class="ext" x1="143" y1="250.0" x2="121" y2="250.0" /><line class="dim" x1="115" y1="50.0" x2="115" y2="250.0" /><text x="109" y="150" transform="rotate(-90 109 150)">Ø40</text><line class="ext" x1="370" y1="180" x2="370" y2="286" /><line class="ext" x1="420" y1="180" x2="420" y2="286" /><line class="dim" x1="370" y1="280" x2="420" y2="280" /><text x="395.0" y="274">10</text><line class="ext" x1="295" y1="180" x2="295" y2="286" /><line class="ext" x1="370" y1="180" x2="370" y2="286" /><line class="dim" x1="295" y1="280" x2="370" y2="280" /><text x="332.5" y="274">15</text><line class="ext" x1="220" y1="180" x2="220" y2="286" /><line class="ext" x1="295" y1="180" x2="295" y2="286" /><line class="dim" x1="220" y1="280" x2="295" y2="280" /><text x="257.5" y="274">15</text><text x="318" y="92" class="r">R2</text><line class="dim" x1="312" y1="96" x2="301" y2="106" /></g></svg><figcaption>Note: Do not scale the drawing. All dimensions are in millimetres. Remove sharp edges and burrs.</figcaption></figure>
-<pre class="program"><code>G75 X0 Z0
-T1 D1
-G96 S200 LIMS=1500 M03
-G00 X43 Z2
-CYCLE95("AB:BC",2.5,0.2,0.8,0,0.25,0,0.15,9,0,0,0)
-AB:
-G01 X0 Z0 F0.2
-G01 X10 Z0
-G01 X15 Z-10
-G01 X15 Z-23
-G02 X19 Z-25 CR=2
-G01 X25 Z-25
-G01 X30 Z-40
-G01 X40 Z-40
-BC:
-G00 X43 Z2
-G75 X0 Z0
-M30</code></pre>
-</section>
-<!-- /cnc-notes -->
 <aside class="ad wrap" data-ad="article" aria-label="Advertisement"><p class="ad-label">Advertisement</p></aside>
 <section class="wrap" aria-labelledby="res-h">
 <h2 id="res-h">Resources</h2>
