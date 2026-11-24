@@ -253,36 +253,36 @@ BC:</code></pre>
 <h2 id="viva-h">Viva Questions</h2>
 <p class="notes-lead">Tick one answer for each question, then press Submit.</p>
 <form class="viva" novalidate>
-<fieldset class="viva-q" data-answer="2"><legend><span class="viva-n">1.</span> In <code>G96 S200 LIMS=1500</code>, what does <code>LIMS=1500</code> set?</legend>
-<label><input type="radio" name="q1" value="0"> <span>The feed</span></label>
-<label><input type="radio" name="q1" value="1"> <span>The cutting speed</span></label>
-<label><input type="radio" name="q1" value="2"> <span>The maximum spindle speed – 1500 rpm</span></label>
-<label><input type="radio" name="q1" value="3"> <span>The tool number</span></label>
+<fieldset class="viva-q" data-answer="1"><legend><span class="viva-n">1.</span> What does <code>G00</code> do?</legend>
+<label><input type="radio" name="q1" value="0"> <span>Linear cutting at the feed rate</span></label>
+<label><input type="radio" name="q1" value="1"> <span>Rapid positioning</span></label>
+<label><input type="radio" name="q1" value="2"> <span>Clockwise arc</span></label>
+<label><input type="radio" name="q1" value="3"> <span>Program stop</span></label>
+<p class="viva-why" hidden>G00 moves the tool at full rapid speed to a position, without cutting – for example G00 X22 Z2.</p></fieldset>
+<fieldset class="viva-q" data-answer="2"><legend><span class="viva-n">2.</span> What does <code>M30</code> do?</legend>
+<label><input type="radio" name="q2" value="0"> <span>Coolant ON</span></label>
+<label><input type="radio" name="q2" value="1"> <span>Spindle stop</span></label>
+<label><input type="radio" name="q2" value="2"> <span>Program end with reset</span></label>
+<label><input type="radio" name="q2" value="3"> <span>Optional stop</span></label>
+<p class="viva-why" hidden>M30 ends the program and resets it to the start, ready for the next job.</p></fieldset>
+<fieldset class="viva-q" data-answer="1"><legend><span class="viva-n">3.</span> Which motors move the axes (X and Z) of a CNC lathe?</legend>
+<label><input type="radio" name="q3" value="0"> <span>Induction motors</span></label>
+<label><input type="radio" name="q3" value="1"> <span>Servo motors</span></label>
+<label><input type="radio" name="q3" value="2"> <span>Stepper motors only</span></label>
+<label><input type="radio" name="q3" value="3"> <span>Hydraulic cylinders</span></label>
+<p class="viva-why" hidden>The X and Z axes are driven by servo motors, which move to the exact position the program gives.</p></fieldset>
+<fieldset class="viva-q" data-answer="2"><legend><span class="viva-n">4.</span> In <code>G96 S200 LIMS=1500</code>, what does <code>LIMS=1500</code> set?</legend>
+<label><input type="radio" name="q4" value="0"> <span>The feed</span></label>
+<label><input type="radio" name="q4" value="1"> <span>The cutting speed</span></label>
+<label><input type="radio" name="q4" value="2"> <span>The maximum spindle speed – 1500 rpm</span></label>
+<label><input type="radio" name="q4" value="3"> <span>The tool number</span></label>
 <p class="viva-why" hidden>With G96, S200 is the cutting speed and LIMS limits the spindle to 1500 rpm as the diameter gets smaller.</p></fieldset>
-<fieldset class="viva-q" data-answer="1"><legend><span class="viva-n">2.</span> In the parting operation, what does <code>G97 S1200</code> mean?</legend>
-<label><input type="radio" name="q2" value="0"> <span>Cutting speed 1200 m/min</span></label>
-<label><input type="radio" name="q2" value="1"> <span>Spindle speed kept at 1200 rpm</span></label>
-<label><input type="radio" name="q2" value="2"> <span>Feed 1200 mm/min</span></label>
-<label><input type="radio" name="q2" value="3"> <span>Tool number 1200</span></label>
-<p class="viva-why" hidden>G97 keeps the spindle speed constant; S1200 is 1200 rpm.</p></fieldset>
-<fieldset class="viva-q" data-answer="1"><legend><span class="viva-n">3.</span> Why is the face turned in two passes, at Z0.25 and then at Z0?</legend>
-<label><input type="radio" name="q3" value="0"> <span>To change the tool</span></label>
-<label><input type="radio" name="q3" value="1"> <span>The first pass removes most of the stock, the second gives the finished face at Z0</span></label>
-<label><input type="radio" name="q3" value="2"> <span>To cut a thread</span></label>
-<label><input type="radio" name="q3" value="3"> <span>To part off the job</span></label>
+<fieldset class="viva-q" data-answer="1"><legend><span class="viva-n">5.</span> Why is the face turned in two passes, at Z0.25 and then at Z0?</legend>
+<label><input type="radio" name="q5" value="0"> <span>To change the tool</span></label>
+<label><input type="radio" name="q5" value="1"> <span>The first pass removes most of the stock, the second gives the finished face at Z0</span></label>
+<label><input type="radio" name="q5" value="2"> <span>To cut a thread</span></label>
+<label><input type="radio" name="q5" value="3"> <span>To part off the job</span></label>
 <p class="viva-why" hidden>The first pass leaves 0.25 mm; the second, finishing pass brings the face exactly to Z0.</p></fieldset>
-<fieldset class="viva-q" data-answer="2"><legend><span class="viva-n">4.</span> Which tool is used for parting off the Rook?</legend>
-<label><input type="radio" name="q4" value="0"> <span>T1 D1 – PCLNR 2020 K12</span></label>
-<label><input type="radio" name="q4" value="1"> <span>T7 D1 – MVJNR 2020 K16</span></label>
-<label><input type="radio" name="q4" value="2"> <span>T3 D1 – CFIR 2020 K06</span></label>
-<label><input type="radio" name="q4" value="3"> <span>T4 D1 – Sleeve (stopper)</span></label>
-<p class="viva-why" hidden>T3 D1, the CFIR 2020 K06 parting tool, cuts the job off at Z-38.</p></fieldset>
-<fieldset class="viva-q" data-answer="1"><legend><span class="viva-n">5.</span> In the parting loop, what does <code>R1=R1-2</code> do each time?</legend>
-<label><input type="radio" name="q5" value="0"> <span>Moves the tool 2 mm along Z</span></label>
-<label><input type="radio" name="q5" value="1"> <span>Takes the tool 2 mm deeper in diameter for the next cut</span></label>
-<label><input type="radio" name="q5" value="2"> <span>Changes the spindle speed</span></label>
-<label><input type="radio" name="q5" value="3"> <span>Ends the program</span></label>
-<p class="viva-why" hidden>R1 holds the X diameter. Each loop takes 2 mm off R1, so the next cut goes deeper, until R1 is below -1.</p></fieldset>
 <p class="viva-score" role="status" hidden></p>
 <div class="viva-bar"><button type="submit" class="viva-submit">Submit</button><button type="button" class="viva-again" hidden>Try again</button></div>
 </form>
