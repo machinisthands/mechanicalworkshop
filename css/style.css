@@ -400,3 +400,37 @@ html.sheet-open { overflow: hidden; }
 
 .feedback { margin-top: 32px; }
 .feedback h2 { margin-bottom: 4px; }
+
+/* ==== CNC Lathe: operating notes and programming ==== */
+.notes h3 { margin: 1.6rem 0 .6rem; font-size: 1.25rem; }
+.notes-lead { margin-bottom: .5rem; }
+.stages { display: flex; flex-wrap: wrap; gap: 8px; padding: 0; margin: 0; list-style: none; counter-reset: st; }
+.stages li { counter-increment: st; padding: 6px 12px; border: 1px solid var(--line); border-radius: 999px; background: var(--surface); color: var(--heading); font-weight: 600; font-size: .9rem; }
+.stages li::before { content: counter(st) ". "; color: var(--copper-light); }
+.step-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 12px; }
+.step-card { padding: 12px 16px; background: var(--surface); border: 1px solid var(--line); border-left: 4px solid var(--copper); border-radius: var(--radius); }
+.step-card h4 { margin: 0 0 6px; font-family: var(--font-display); font-size: 1.15rem; color: var(--heading); }
+.step-card ol { margin: 0; padding-left: 1.3em; }
+.step-card li { margin-bottom: 3px; line-height: 1.5; }
+.step-card li::marker { color: var(--copper); font-weight: 600; }
+.note-warn { margin: 8px 0 0; padding: 6px 10px; border-radius: 6px; background: rgba(229, 72, 77, .12); color: #FF8A8E; font-size: .9rem; }
+@media (prefers-color-scheme: light) { .note-warn { color: #B42318; background: rgba(198, 40, 40, .08); } }
+.codes { display: grid; grid-template-columns: max-content 1fr; margin: 0; border: 1px solid var(--line); border-radius: var(--radius); overflow: hidden; background: var(--surface); }
+.codes dt, .codes dd { margin: 0; padding: 8px 12px; border-top: 1px solid var(--line); }
+.codes dt:first-of-type, .codes dt:first-of-type + dd { border-top: 0; }
+.codes dt { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-weight: 700; color: var(--copper-light); background: var(--surface-2); }
+.codes code, .program { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; }
+.codes code { font-size: .85em; color: var(--heading); }
+.part-fig { margin: 0 0 12px; padding: 12px; background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); }
+.part-svg { display: block; width: 100%; max-width: 620px; height: auto; margin: 0 auto; }
+.part-svg .part { fill: none; stroke: var(--heading); stroke-width: 2; stroke-linejoin: round; }
+.part-svg .part .thin { stroke-width: 1; }
+.part-svg .axis { stroke: var(--muted); stroke-width: 1; stroke-dasharray: 14 4 3 4; }
+.part-svg .dims line { stroke: var(--copper-light); stroke-width: 1; }
+.part-svg .dims .dim { marker-start: url(#ar); marker-end: url(#ar); }
+.part-svg .dims line:not(.dim):not(.ext) { marker-end: url(#ar); }
+.part-svg .dims .ext { stroke: var(--muted); stroke-width: .6; }
+.part-svg marker path { fill: var(--copper-light); }
+.part-svg text { fill: var(--heading); font-size: 13px; text-anchor: middle; font-family: inherit; }
+.part-fig figcaption { margin-top: 8px; font-size: .85rem; color: var(--muted); }
+.program { margin: 0; padding: 14px 16px; background: var(--code); color: var(--heading); border: 1px solid var(--line); border-radius: var(--radius); overflow-x: auto; font-size: .9rem; line-height: 1.6; }
