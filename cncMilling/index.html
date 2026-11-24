@@ -120,58 +120,6 @@
 <h2 id="drawing-h">Engineering Drawing</h2>
 <a class="drawing" href="../img/jobs/cncMilling/drawing-full.jpg" target="_blank" rel="noopener"><img src="../img/jobs/cncMilling/drawing.webp" srcset="../img/jobs/cncMilling/drawing-900.webp 900w, ../img/jobs/cncMilling/drawing.webp 1800w" sizes="(min-width: 960px) 890px, 100vw" alt="Engineering drawing of CNC Milling" width="1800" height="1273" loading="lazy" decoding="async"></a>
 </section>
-<!-- cnc-notes -->
-<section class="wrap notes" aria-labelledby="notes-h">
-<h2 id="notes-h">Operating Notes &amp; Programming</h2>
-<p class="notes-lead">CNC – <b>Computer Numerical Control</b>. Working on the CNC milling machine has four stages:</p>
-<ol class="stages"><li>Machine instruction</li><li>Tooling</li><li>Program entry</li><li>Manufacturing</li></ol>
-
-<h3>Operating the machine</h3>
-<div class="step-grid">
-<div class="step-card"><h4>Machine ON</h4><ol><li>Compressor ON</li><li>Main panel ON</li><li>Stabilizer ON</li><li>Select three phase (menu button three times)</li><li>Machine main power ON</li><li>Power ON</li></ol></div>
-<div class="step-card"><h4>Running setup</h4><ol><li><b>Alarm</b> – clear each one:<ul><li>Reset (low air pressure)</li><li>Reset (emergency ON)</li><li>Reset (servo ON)</li></ul></li><li><b>Setting</b>:<ul><li>Page down</li><li>Safety override – ON (F1)</li><li>Write enter – Y</li></ul></li></ol></div>
-<div class="step-card"><h4>Zero return (referencing)</h4><ol><li>Zero return</li><li>All</li><li>Hand jog (twice)</li><li>Select the axis (X, Y, Z)</li><li>Select 0.1</li><li>Turn the hand wheel (until the table moves)</li></ol></div>
-<div class="step-card"><h4>Work offset</h4><ol><li>Offset (tool offset)</li><li>Offset – work offset page (G54–G57)</li><li>Bring the tool to position</li><li>Part zero set</li></ol><p class="note-warn">⚠ Important: once the work offset is taken, do not switch the machine off.</p></div>
-<div class="step-card"><h4>New program</h4><ol><li>List program → Directory</li><li>Type O first, then the number, and Enter</li><li>Write enter</li><li>MEM</li><li>Edit</li><li>Enter the program</li></ol></div>
-<div class="step-card"><h4>Simulation</h4><ol><li>MEM</li><li>Graph</li><li>Setting (twice)</li><li>Keep a hand on Reset and press Cycle Start</li><li>F4</li><li>Single block</li><li>Keep a hand on Reset and press Cycle Start, until the program ends (M30)</li></ol><p class="note-warn">⚠ Important: if the machine moves, press Reset.</p></div>
-<div class="step-card"><h4>Running the program</h4><ol><li>MEM</li><li>Graph</li><li>Keep a hand on Reset and press Cycle Start</li></ol><p class="note-warn">⚠ Important: if there is any movement that is not in the program, press Reset.</p></div>
-</div>
-
-<h3>Preparatory functions (G codes)</h3>
-<dl class="codes"><dt>G00</dt><dd>Rapid positioning<br><code>G00 X10 Y10</code> · <code>G00 Z10</code></dd><dt>G01</dt><dd>Linear interpolation<br><code>G01 X10 Y10 F100</code></dd><dt>G02</dt><dd>Circular interpolation, clockwise (CW)<br><code>G01 X0 Y0</code> → <code>G02 X10 Y0 R5</code></dd><dt>G03</dt><dd>Circular interpolation, counter-clockwise (CCW)<br><code>G01 X0 Y0</code> → <code>G03 X10 Y0 R5</code></dd><dt>G20</dt><dd>Dimensions in inch</dd><dt>G21</dt><dd>Dimensions in mm</dd><dt>G28</dt><dd>Return to home</dd><dt>G40</dt><dd>Cutter radius compensation off</dd><dt>G41</dt><dd>Cutter radius compensation – left</dd><dt>G42</dt><dd>Cutter radius compensation – right</dd><dt>G54–G57</dt><dd>Work zero (zero offset)</dd><dt>G90</dt><dd>Absolute dimensions – a 10 mm square:<br><code>X0 Y0</code> → <code>X10 Y0</code> → <code>X10 Y10</code> → <code>X0 Y10</code> → <code>X0 Y0</code></dd><dt>G91</dt><dd>Incremental dimensions – the same square:<br><code>X0 Y0</code> → <code>X10 Y0</code> → <code>X0 Y10</code> → <code>X-10 Y0</code> → <code>X0 Y-10</code></dd></dl>
-
-<h3>Miscellaneous functions (M codes)</h3>
-<dl class="codes"><dt>M03</dt><dd>Spindle clockwise (CW) – <code>M03 S1500</code></dd><dt>M04</dt><dd>Spindle counter-clockwise (CCW) – <code>M04 S100</code></dd><dt>M05</dt><dd>Spindle stop</dd><dt>M06</dt><dd>Tool change (<code>T1 M06</code>)</dd><dt>M08</dt><dd>Coolant ON</dd><dt>M09</dt><dd>Coolant OFF</dd><dt>M30</dt><dd>Program end and reset</dd></dl>
-
-<h3>Other words</h3>
-<dl class="codes"><dt>T</dt><dd>Tool selection</dd><dt>S</dt><dd>Spindle speed in rpm</dd><dt>F</dt><dd>Feed in mm/min</dd><dt>R</dt><dd>Radius of circle</dd><dt>O</dt><dd>First character of the program (program name), e.g. <code>O00001</code></dd></dl>
-
-<h3>Example program</h3>
-<figure class="part-fig"><svg class="part-svg" viewBox="0 0 420 390" role="img" aria-label="Example part for the program: 70 by 70 mm plate with an engraved outline – 45° chamfer, R15 and R25 arcs"><defs><marker id="arm" viewBox="0 0 10 10" refX="10" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0 0 10 5 0 10z" /></marker></defs><g class="part"><rect x="70" y="50" width="280" height="280" /><path class="engrave" d="M 130 290 L 130 130 L 170 90 L 230 90 A 60 60 0 0 1 290 150 L 290 190 A 100 100 0 0 0 190 290 Z" /></g><g class="dims mill"><line class="ext" x1="70" y1="50" x2="70" y2="22" /><line class="ext" x1="130" y1="50" x2="130" y2="22" /><line class="dim" x1="70" y1="28" x2="130" y2="28" /><text x="100.0" y="23">15</text><line class="ext" x1="130" y1="130" x2="130" y2="22" /><line class="ext" x1="170" y1="130" x2="170" y2="22" /><line class="dim" x1="130" y1="28" x2="170" y2="28" /><text x="150.0" y="23">10</text><line class="ext" x1="170" y1="90" x2="170" y2="22" /><line class="ext" x1="230" y1="90" x2="230" y2="22" /><line class="dim" x1="170" y1="28" x2="230" y2="28" /><text x="200.0" y="23">15</text><line class="ext" x1="70" y1="50" x2="34" y2="50" /><line class="ext" x1="70" y1="90" x2="34" y2="90" /><line class="dim" x1="40" y1="50" x2="40" y2="90" /><text x="34" y="70.0" transform="rotate(-90 34 70.0)">10</text><line class="ext" x1="130" y1="130" x2="34" y2="130" /><line class="ext" x1="130" y1="290" x2="34" y2="290" /><line class="dim" x1="40" y1="130" x2="40" y2="290" /><text x="34" y="210.0" transform="rotate(-90 34 210.0)">40</text><line class="ext" x1="350" y1="330" x2="378" y2="330" /><line class="ext" x1="350" y1="50" x2="378" y2="50" /><line class="dim" x1="372" y1="330" x2="372" y2="50" /><text x="386" y="190.0" transform="rotate(-90 386 190.0)">70</text><line class="ext" x1="70" y1="330" x2="70" y2="368" /><line class="ext" x1="350" y1="330" x2="350" y2="368" /><line class="dim" x1="70" y1="362" x2="350" y2="362" /><text x="210.0" y="378">70</text><text x="278" y="82">R15</text><line class="lead" x1="270" y1="90" x2="264.0" y2="108.0" /><text x="258" y="250">R25</text><line class="lead" x1="246" y1="240.0" x2="220.4" y2="220.4" /><text x="162" y="134">45°</text></g></svg><figcaption>Plate 70 × 70 × 10 mm. Engraving depth 0.05 mm. Do not scale the drawing. All dimensions are in millimetres. Remove sharp edges and burrs.</figcaption></figure>
-<pre class="program"><code>O00001
-G28
-T1 M06
-G54 G40 G21 G90
-M03 S1500
-M08
-G00 X15 Y10
-G00 Z10
-G01 Z-0.05 F100
-G01 X15 Y10 F800
-G01 X15 Y50
-G01 X25 Y60
-G01 X40 Y60
-G02 X55 Y45 R15
-G01 X55 Y35
-G03 X30 Y10 R25
-G01 X15 Y10
-G00 Z10
-G28
-M09
-M05
-M30</code></pre>
-</section>
-<!-- /cnc-notes -->
 <aside class="ad wrap" data-ad="article" aria-label="Advertisement"><p class="ad-label">Advertisement</p></aside>
 <section class="wrap" aria-labelledby="res-h">
 <h2 id="res-h">Resources</h2>
