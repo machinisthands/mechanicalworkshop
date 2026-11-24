@@ -269,9 +269,9 @@
     const dl = new T.DirectionalLight(0xffffff, 1.4); dl.position.set(20, 40, 30); scene.add(dl);
     const camera = new T.PerspectiveCamera(30, 1, 0.1, 2000);
     const midZ = (PART_Z + 2) / 2;
-    camera.position.set(midZ + 4, 12 + STOCK_R, 112 + STOCK_R * 3.8);
+    camera.position.set(midZ + 11, 12 + STOCK_R, 112 + STOCK_R * 3.8);
     const controls = new X.OrbitControls(camera, renderer.domElement);
-    controls.target.set(midZ + 2, 8, 0); controls.enableDamping = true; controls.update(); controls.saveState();
+    controls.target.set(midZ + 9, 8, 0); controls.enableDamping = true; controls.update(); controls.saveState();
 
     // world: X = machine Z (to the right), Y = radius (up)
     const steel = new T.MeshStandardMaterial({ color: 0xc4c9ce, metalness: 0.9, roughness: 0.32 });
@@ -315,7 +315,7 @@
       dirty = false;
     }
     // tools
-    const toolMats = { 1: 0xd4af37, 7: 0xd4af37, 3: 0xd4af37, 4: 0x111114 };   // gold-coloured (coated carbide) inserts; stopper sleeve black so it stands out from the bar
+    const toolMats = { 1: 0xd4af37, 7: 0xd4af37, 3: 0xd4af37, 4: 0x18181b };   // gold-coloured (coated carbide) inserts; stopper sleeve black so it stands out from the bar
     const tools = {};
     /* Tools as on the machine (insert shapes from the holder codes):
      *  T1 PCLNR 2020 K12 – 95° holder, CNMG 1204 insert (80° rhombic, 12.7 mm IC)
@@ -333,27 +333,34 @@
       return { ins, P1, P3 };
     }
     function makeTool(n) {
-      const g = new T.Group(), m = new T.MeshStandardMaterial({ color: toolMats[n] || 0xd9a383, metalness: 0.4, roughness: 0.45 });
+      const g = new T.Group(), m = new T.MeshStandardMaterial({ color: toolMats[n] || 0xd9a383, metalness: n === 4 ? 0.75 : 0.4, roughness: n === 4 ? 0.3 : 0.45 });
       if (n === 3) {                                               // 6 mm parting blade, reference on its right edge
         // insert at the tip, a thin blade (narrower than the insert) going up to a 20 × 20 shank on its right
-        const ins = new T.Mesh(new T.BoxGeometry(PART_W, 5, 6), m); ins.position.set(-PART_W / 2, 2.5, -3); g.add(ins);
-        const blade = new T.Mesh(new T.BoxGeometry(PART_W - 1.2, 26, 20), holderM); blade.position.set(-PART_W / 2, 5 + 13, -10); g.add(blade);
-        const shank = new T.Mesh(new T.BoxGeometry(20, 60, 20), holderM); shank.position.set(-PART_W / 2 + 12.6, 31 + 30, -10); g.add(shank);
+        // CFIR (Seco MDT) parting holder, as in the photo: a straight 20 × 20 shank, a head block at its end and a thin
+        // blade plate on the head's left side, deeper than the shank, with the 6 mm insert at its tip (max. cut depth 18 mm)
+        const x0 = -PART_W + 0.6;                                    // left side of blade, head and shank (flush)
+        const ins = new T.Mesh(new T.BoxGeometry(PART_W, 14, 5), m); ins.position.set(-PART_W / 2, 7, -2.5); g.add(ins);
+        const blade = new T.Mesh(new T.BoxGeometry(PART_W - 1.2, 20, 28), holderM); blade.position.set(-PART_W / 2, 4 + 10, -14 - 1); g.add(blade);
+        const head = new T.Mesh(new T.BoxGeometry(20, 18, 20), holderM); head.position.set(x0 + 10, 24 + 9, -10); g.add(head);
+        const shank = new T.Mesh(new T.BoxGeometry(20, 60, 20), holderM); shank.position.set(x0 + 10, 42 + 30, -10); g.add(shank);
+        const screw = new T.Mesh(new T.CylinderGeometry(3, 3, 1.5, 20), new T.MeshStandardMaterial({ color: 0x111114, metalness: 0.6, roughness: 0.4 }));
+        screw.rotation.x = Math.PI / 2; screw.position.set(x0 + 10, 33, 0.6); g.add(screw);
       } else if (n === 4) {
-        const c = new T.Mesh(new T.CylinderGeometry(5, 5, 24, 32), m); c.rotation.z = Math.PI / 2; c.position.set(SLEEVE + 0.05 + 12, 0, 0); g.add(c);
+        // stopper: a black rod on the spindle centre line, its face 1 mm past Z0, held in a light holder block so it shows
+        const c = new T.Mesh(new T.CylinderGeometry(4, 4, 26, 32), m); c.rotation.z = Math.PI / 2; c.position.set(SLEEVE + 0.05 + 13, 0, 0); g.add(c);
+        const blk = new T.Mesh(new T.BoxGeometry(14, 26, 20), new T.MeshStandardMaterial({ color: 0x9aa0a6, metalness: 0.6, roughness: 0.4 }));
+        blk.position.set(SLEEVE + 0.05 + 26 + 7, 0, 0); g.add(blk);
       } else {
         const r = n === 7 ? rhombicInsert(93, 35, 9.525, m) : rhombicInsert(95, 80, 12.7, m);
         g.add(r.ins);
-        // The holder head follows the insert: its sides run along the insert's edges, so on the narrow 35° VNMG
-        // the head stays clear of the work in profiling. The 20 × 20 shank starts only after the head length
-        // (LH ≈ 32 mm MVJNR, 28 mm PCLNR). Functional width 25 mm: the shank's far side is 25 mm from the tip.
-        const LH = n === 7 ? 32 : 28, WF = 25, [p1, p3] = [r.P1, r.P3];
+        // One straight 20 × 20 shank, square to the axis, with its end cut along the insert (as on PCLNR / MVJNR):
+        // the insert sits on the corner, the end face follows its edges, the shank's far side is 25 mm from the tip.
+        const WF = 25, SL = 95, [p1, p3] = [r.P1, r.P3], left = WF - 20;
         const hs = new T.Shape();
-        hs.moveTo(0.4, 0.4); hs.lineTo(p1[0], p1[1]); hs.lineTo(p1[0], LH); hs.lineTo(WF, LH); hs.lineTo(WF, p3[1]); hs.lineTo(p3[0], p3[1]); hs.lineTo(0.4, 0.4);
-        const head = new T.Mesh(new T.ExtrudeGeometry(hs, { depth: 20, bevelEnabled: false }), holderM);
-        head.position.z = -4.76 - 20; g.add(head);
-        const shank = new T.Mesh(new T.BoxGeometry(20, 60, 20), holderM);
-        shank.position.set(WF - 10, LH + 30, -4.76 - 10); g.add(shank);
+        hs.moveTo(0.4, 0.4); hs.lineTo(p1[0], p1[1]); hs.lineTo(left, p1[1] + 4); hs.lineTo(left, SL); hs.lineTo(WF, SL);
+        hs.lineTo(WF, Math.max(p3[1], 2)); hs.lineTo(p3[0], p3[1]); hs.lineTo(0.4, 0.4);
+        const shank = new T.Mesh(new T.ExtrudeGeometry(hs, { depth: 20, bevelEnabled: false }), holderM);
+        shank.position.z = -4.76 - 20; g.add(shank);
       }
       g.visible = false; scene.add(g); return g;
     }
