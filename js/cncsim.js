@@ -231,13 +231,16 @@
   svg.addEventListener('click', (e) => { const p = e.target.closest('[data-line]'); if (p) pickSeg(+p.dataset.line, true); });
 
   /* ---------- 3D (Three.js, shared with the model viewer) ---------- */
-  // Full Three.js as an ES module (the model viewer's bundle has only what the viewer needs).
-  // The page's import map points "three" at js/vendor/three/three.module.min.js.
+  // Three.js: the same small bundle as the model viewer (js/vendor/three-bundle.min.js, built from scripts/three-entry.js).
+  // If the viewer is already loading it, wait for that instead of loading it twice.
   function need3D(cb) {
-    Promise.all([import('three'), import(jsBase + 'vendor/three/addons/controls/OrbitControls.js'),
-      import(jsBase + 'vendor/three/addons/environments/RoomEnvironment.js')])
-      .then(([T, oc, re]) => cb(T, { OrbitControls: oc.OrbitControls, RoomEnvironment: re.RoomEnvironment }))
-      .catch(() => { $('.sim-msg').textContent = 'The simulation could not be loaded.'; });
+    const ready = () => cb(window.THREE, window.THREEX);
+    if (window.THREE && window.THREE.LatheGeometry) return ready();
+    const src = jsBase + 'vendor/three-bundle.min.js';
+    let s = [...document.scripts].find((x) => x.src === new URL(src, location.href).href);
+    if (!s) { s = document.createElement('script'); s.src = src; document.head.appendChild(s); }
+    s.addEventListener('load', ready, { once: true });
+    s.addEventListener('error', () => { $('.sim-msg').textContent = 'The simulation could not be loaded.'; }, { once: true });
   }
   const io = new IntersectionObserver((en) => { if (en[0].isIntersecting) { io.disconnect(); need3D(start); } }, { rootMargin: '300px' });
   io.observe(host);
@@ -392,7 +395,7 @@
     }
 
     /* playback */
-    let idx = 0, along = 0, playing = false, stepTo = -1, speedF = 3, last = 0, spinOn = false;
+    let idx = 0, along = 0, playing = false, speedF = 3, last = 0, spinOn = false;
     const dro = { x: $('.d-x'), z: $('.d-z'), t: $('.d-t'), s: $('.d-s'), f: $('.d-f'), m: $('.d-msg') };
     let curLine = -1, tip = { ...HOME };
     function showLine(l, seg) {
@@ -410,7 +413,7 @@
       dro.f.textContent = m.kind === 'rapid' ? 'G00 rapid' : m.feed; spinOn = !!m.spindle;
     }
     function reset() {
-      idx = 0; along = 0; playing = false; stepTo = -1; resetMat(); dirty = true;
+      idx = 0; along = 0; playing = false; resetMat(); dirty = true;
       pathCut.length = 0; pathRap.length = 0; flushPaths();
       $('.sim-play').textContent = '▶ Play'; $('.sim-play').setAttribute('aria-pressed', 'false'); dro.m.textContent = '';
       tip = { ...HOME }; curLine = -1; spinOn = false; placeTool(MOVES[0] || { tool: 0, speed: '', spindle: '', feed: '' }, tip); showLine(MOVES[0] ? MOVES[0].line : 0, null);
@@ -442,7 +445,7 @@
         const a = { z: m.from.z + (m.to.z - m.from.z) * t0, r: m.from.r + (m.to.r - m.from.r) * t0 };
         (m.kind === 'rapid' ? pathRap : pathCut).push(a.z, a.r, 0.05, tip.z, tip.r, 0.05);
         placeTool(m, tip);
-        if (along >= L - 1e-9) { idx++; along = 0; if (stepTo >= 0 && (idx >= MOVES.length || MOVES[idx].line !== m.line)) { stepTo = -1; flushPaths(); return 'step'; } }
+        if (along >= L - 1e-9) { idx++; along = 0; }
       }
       flushPaths();
       if (idx >= MOVES.length) return 'end';

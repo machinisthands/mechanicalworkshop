@@ -165,8 +165,6 @@ p { margin: 0 0 1rem; }
 .badge { display: inline-block; margin: 0 0 .25rem; padding: 3px 10px; border-radius: 6px; background: var(--copper-tint); color: var(--copper-light);
   font-size: .8rem; font-weight: 600; letter-spacing: .1em; text-transform: uppercase; }
 .job > header h1 { margin-bottom: .5rem; }
-.section-head { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: .5rem; margin-bottom: 10px; }
-.section-head h2 { margin: 0; }
 
 /* 3D viewer (same as the WorldSkills site) */
 .viewer-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; margin-bottom: 10px; }
@@ -218,8 +216,6 @@ html.lab-open { overflow: hidden; }
 .btn { display: inline-flex; align-items: center; gap: 6px; min-height: 40px; padding: 0 14px; border: 1px solid var(--copper); border-radius: 8px;
   background: var(--surface); color: var(--copper-light); font: inherit; font-size: .9rem; font-weight: 600; cursor: pointer; transition: background-color .15s; }
 .btn:hover, .btn:focus-visible { background: var(--copper-tint); color: var(--heading); }
-.btn-secondary { border-color: var(--line); color: var(--text); }
-.btn-secondary:hover, .btn-secondary:focus-visible { border-color: var(--line-strong); background: var(--surface-2); }
 
 /* Resources: download-style buttons */
 .resources { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 12px; margin: 10px 0 0; padding: 0; list-style: none; }
@@ -405,14 +401,11 @@ html.sheet-open { overflow: hidden; }
 /* ==== CNC Lathe: operating notes and programming ==== */
 .notes h3 { margin: 1.6rem 0 .6rem; font-size: 1.25rem; }
 .notes-lead { margin-bottom: .5rem; }
-.stages { display: flex; flex-wrap: wrap; gap: 8px; padding: 0; margin: 0; list-style: none; counter-reset: st; }
-.stages li { counter-increment: st; padding: 6px 12px; border: 1px solid var(--line); border-radius: 999px; background: var(--surface); color: var(--heading); font-weight: 600; font-size: .9rem; }
-.stages li::before { content: counter(st) ". "; color: var(--copper-light); }
 .step-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 12px; }
 .step-card { padding: 12px 16px; background: var(--surface); border: 1px solid var(--line); border-left: 4px solid var(--copper); border-radius: var(--radius); }
-.step-card h5 { margin: 10px 0 4px; font-size: .95rem; color: var(--copper-light); text-transform: uppercase; letter-spacing: .06em; }
-.step-card h5 + ol { margin-bottom: 4px; }
-.step-card h4 { margin: 0 0 6px; font-family: var(--font-display); font-size: 1.15rem; color: var(--heading); }
+.step-card h4 { margin: 10px 0 4px; font-size: .95rem; color: var(--copper-light); text-transform: uppercase; letter-spacing: .06em; }
+.step-card h4 + ol { margin-bottom: 4px; }
+.step-card h3 { margin: 0 0 6px; font-family: var(--font-display); font-size: 1.15rem; color: var(--heading); }
 .step-card ol { margin: 0; padding-left: 1.3em; }
 .step-card li { margin-bottom: 3px; line-height: 1.5; }
 .step-card li::marker { color: var(--copper); font-weight: 600; }
@@ -422,28 +415,8 @@ html.sheet-open { overflow: hidden; }
 .codes dt, .codes dd { margin: 0; padding: 8px 12px; border-top: 1px solid var(--line); }
 .codes dt:first-of-type, .codes dt:first-of-type + dd { border-top: 0; }
 .codes dt { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-weight: 700; color: var(--copper-light); background: var(--surface-2); }
-.codes code { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; }
-.codes code { font-size: .85em; color: var(--heading); }
-.part-fig { margin: 0 0 12px; padding: 12px; background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); }
-.part-svg { display: block; width: 100%; max-width: 620px; height: auto; margin: 0 auto; }
-.part-svg .part { fill: none; stroke: var(--heading); stroke-width: 2; stroke-linejoin: round; }
-.part-svg .part .thin { stroke-width: 1; }
-.part-svg .axis { stroke: var(--muted); stroke-width: 1; stroke-dasharray: 14 4 3 4; }
-.part-svg .dims line { stroke: var(--copper-light); stroke-width: 1; }
-.part-svg .dims .dim { marker-start: url(#ar); marker-end: url(#ar); }
-.part-svg .dims line:not(.dim):not(.ext) { marker-end: url(#ar); }
-.part-svg .dims .ext { stroke: var(--muted); stroke-width: .6; }
-.part-svg marker path { fill: var(--copper-light); }
-.part-svg text { fill: var(--heading); font-size: 13px; text-anchor: middle; font-family: inherit; }
-.part-fig figcaption { margin-top: 8px; font-size: .85rem; color: var(--muted); }
+.codes code { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: .85em; color: var(--heading); white-space: nowrap; }
 .notes .program { margin: 0; max-height: none; }
-/* milling notes: card sub-lists, engraved outline, own arrow marker */
-.step-card li ul { margin: 4px 0 2px; padding-left: 1.1em; list-style: disc; }
-.part-svg .part rect { fill: var(--surface-2); }
-.part-svg .part .engrave { stroke: var(--copper-light); stroke-width: 2.5; }
-.part-svg .dims.mill .dim { marker-start: url(#arm); marker-end: url(#arm); }
-.part-svg .dims .lead { stroke: var(--copper-light); stroke-width: 1; }
-.codes code { white-space: nowrap; }
 /* ==== Viva questions ==== */
 .viva { display: grid; gap: 12px; }
 .viva-q { margin: 0; padding: 12px 16px 14px; background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); }
