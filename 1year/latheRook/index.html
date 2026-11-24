@@ -277,12 +277,12 @@ BC:</code></pre>
 <label><input type="radio" name="q4" value="2"> <span>The maximum spindle speed – 1500 rpm</span></label>
 <label><input type="radio" name="q4" value="3"> <span>The tool number</span></label>
 <p class="viva-why" hidden>With G96, S200 is the cutting speed and LIMS limits the spindle to 1500 rpm as the diameter gets smaller.</p></fieldset>
-<fieldset class="viva-q" data-answer="1"><legend><span class="viva-n">5.</span> Why is the face turned in two passes, at Z0.25 and then at Z0?</legend>
-<label><input type="radio" name="q5" value="0"> <span>To change the tool</span></label>
-<label><input type="radio" name="q5" value="1"> <span>The first pass removes most of the stock, the second gives the finished face at Z0</span></label>
-<label><input type="radio" name="q5" value="2"> <span>To cut a thread</span></label>
-<label><input type="radio" name="q5" value="3"> <span>To part off the job</span></label>
-<p class="viva-why" hidden>The first pass leaves 0.25 mm; the second, finishing pass brings the face exactly to Z0.</p></fieldset>
+<fieldset class="viva-q" data-answer="1"><legend><span class="viva-n">5.</span> In the parting loop, what does <code>R1=R1-2</code> do each time?</legend>
+<label><input type="radio" name="q5" value="0"> <span>Moves the tool 2 mm along Z</span></label>
+<label><input type="radio" name="q5" value="1"> <span>Takes the tool 2 mm deeper in diameter for the next cut</span></label>
+<label><input type="radio" name="q5" value="2"> <span>Changes the spindle speed</span></label>
+<label><input type="radio" name="q5" value="3"> <span>Ends the program</span></label>
+<p class="viva-why" hidden>R1 holds the X diameter. Each loop takes 2 mm off R1, so the next cut goes deeper, until R1 is below -1.</p></fieldset>
 <p class="viva-score" role="status" hidden></p>
 <div class="viva-bar"><button type="submit" class="viva-submit">Submit</button><button type="button" class="viva-again" hidden>Try again</button></div>
 </form>
