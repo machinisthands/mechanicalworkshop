@@ -1,0 +1,392 @@
+/* Machinist Hands — CNC lathe simulation (js/cncsim.js).
+ * Reads the Siemens 802D program shown on the page (<pre class="program">), runs it on a turned 3D bar
+ * and shows the tool moving, the current block highlighted and the contour (AB … BC) as a profile.
+ * Tap a contour block to see it on the profile, or tap the profile to find its block.
+ * Supported: G00 G01 G02 G03 (CR=), G75 home, T/D, S, F, M00/M01/M03/M05/M30, R parameters,
+ * IF … GOTO, N labels and CYCLE95 (roughing + finishing, simplified for teaching). */
+(function () {
+  'use strict';
+  const pre = document.querySelector('pre.program');
+  const host = document.querySelector('[data-cncsim]');
+  if (!pre || !host) return;
+  const jsBase = (document.currentScript && document.currentScript.src || '').replace(/[^/]*$/, '');
+  const SRC = pre.textContent.replace(/\r/g, '').split('\n');
+
+  /* ---------- tiny expression evaluator: numbers, R1…, + - * /, ( ) ---------- */
+  function evalExpr(s, R) {
+    const t = s.replace(/\s+/g, '').match(/R\d+|\d*\.?\d+|[-+*/()]/g) || [];
+    let i = 0;
+    const atom = () => {
+      const k = t[i++];
+      if (k === '(') { const v = sum(); i++; return v; }
+      if (k === '-') return -atom();
+      if (k === '+') return atom();
+      if (/^R\d+$/.test(k)) return R[k] || 0;
+      return parseFloat(k);
+    };
+    const prod = () => { let v = atom(); while (t[i] === '*' || t[i] === '/') v = t[i++] === '*' ? v * atom() : v / atom(); return v; };
+    const sum = () => { let v = prod(); while (t[i] === '+' || t[i] === '-') v = t[i++] === '+' ? v + prod() : v - prod(); return v; };
+    return sum();
+  }
+  const clean = (l) => l.split(';')[0].trim().toUpperCase();
+
+  /* ---------- geometry ---------- */
+  // Points are {z, r} (r = radius = X/2). Arcs: G02 clockwise / G03 counter-clockwise seen with Z to the right, X up.
+  function arcPoints(a, b, R, cw) {
+    const dz = b.z - a.z, dr = b.r - a.r, d = Math.hypot(dz, dr);
+    if (d < 1e-9) return [b];
+    const rad = Math.max(R, d / 2), h = Math.sqrt(Math.max(rad * rad - d * d / 4, 0));
+    const mz = (a.z + b.z) / 2, mr = (a.r + b.r) / 2, nz = -dr / d, nr = dz / d;
+    const s = cw ? -1 : 1;                          // centre on the left of a→b for CCW (minor arc)
+    const cz = mz + s * nz * h, cr = mr + s * nr * h;
+    let a0 = Math.atan2(a.r - cr, a.z - cz), a1 = Math.atan2(b.r - cr, b.z - cz);
+    if (cw) { while (a1 > a0) a1 -= 2 * Math.PI; } else { while (a1 < a0) a1 += 2 * Math.PI; }
+    const n = Math.max(4, Math.ceil(Math.abs(a1 - a0) * rad / 0.15));
+    const out = [];
+    for (let k = 1; k <= n; k++) { const t = a0 + (a1 - a0) * k / n; out.push({ z: cz + rad * Math.cos(t), r: cr + rad * Math.sin(t) }); }
+    return out;
+  }
+
+  /* ---------- program structure ---------- */
+  const labelAt = {};                     // 'AB' / 'N1005' → line index
+  SRC.forEach((l, i) => {
+    const c = clean(l);
+    let m = c.match(/^([A-Z_][A-Z0-9_]*):$/); if (m) labelAt[m[1]] = i;
+    m = c.match(/^(N\d+)\b/); if (m && labelAt[m[1]] === undefined) labelAt[m[1]] = i;
+  });
+
+  function contourFrom(name1, name2) {          // elements between the labels, with the line of each
+    const i1 = labelAt[name1], i2 = labelAt[name2];
+    const els = []; let p = null, mode = 1;
+    for (let i = i1 + 1; i < i2; i++) {
+      const c = clean(SRC[i]); if (!c) continue;
+      const g = c.match(/G0?([0-3])(?!\d)/); if (g) mode = +g[1];
+      const x = c.match(/X\s*(-?\d*\.?\d+)/), z = c.match(/Z\s*(-?\d*\.?\d+)/), cr = c.match(/CR\s*=\s*(-?\d*\.?\d+)/);
+      const q = { z: z ? +z[1] : (p ? p.z : 0), r: x ? +x[1] / 2 : (p ? p.r : 0) };
+      if (!p) { p = q; els.push({ line: i, pts: [q], start: true }); continue; }
+      const pts = (mode >= 2 && cr) ? arcPoints(p, q, +cr[1], mode === 2) : [q];
+      els.push({ line: i, from: p, pts }); p = q;
+    }
+    return els;
+  }
+  function profileR(els, z) {                    // largest contour radius at z (keeps material at steps)
+    let best = -1, prev = null;
+    els.forEach((e) => e.pts.forEach((q) => {
+      if (prev) {
+        const z0 = prev.z, z1 = q.z;
+        if ((z <= z0 && z >= z1) || (z <= z1 && z >= z0)) {
+          const t = Math.abs(z1 - z0) < 1e-9 ? 0 : (z - z0) / (z1 - z0);
+          best = Math.max(best, Math.abs(z1 - z0) < 1e-9 ? Math.max(prev.r, q.r) : prev.r + t * (q.r - prev.r));
+        }
+      }
+      prev = q;
+    }));
+    return best;
+  }
+
+  /* ---------- run the program into a list of moves ---------- */
+  const HOME = { z: 40, r: 30 };
+  function run() {
+    const moves = []; const R = {};
+    let pos = { ...HOME }, mode = 0, tool = 0, i = 0, guard = 0, spindle = '', feed = '', speed = '';
+    const push = (to, kind, line, extra) => { moves.push({ from: { ...pos }, to: { ...to }, kind, line, tool, spindle, feed, speed, ...extra }); pos = { ...to }; };
+    while (i < SRC.length && guard++ < 20000) {
+      const c = clean(SRC[i]); const line = i; i++;
+      if (!c || /^[A-Z_][A-Z0-9_]*:$/.test(c)) continue;
+      let m;
+      if ((m = c.match(/^IF\s+(.+?)\s*(>=|<=|==|<>|>|<)\s*(.+?)\s+GOTO[FB]?\s+(\w+)/))) {
+        const a = evalExpr(m[1], R), b = evalExpr(m[3], R), op = m[2];
+        const ok = op === '>=' ? a >= b : op === '<=' ? a <= b : op === '==' ? a === b : op === '<>' ? a !== b : op === '>' ? a > b : a < b;
+        if (ok && labelAt[m[4]] !== undefined) i = labelAt[m[4]] + 1;
+        moves.push({ kind: 'mark', line, from: { ...pos }, to: { ...pos }, tool, spindle, feed, speed }); continue;
+      }
+      if ((m = c.match(/^(R\d+)\s*=\s*(.+)$/))) { R[m[1]] = evalExpr(m[2], R); moves.push({ kind: 'mark', line, from: { ...pos }, to: { ...pos }, tool, spindle, feed, speed }); continue; }
+      if ((m = c.match(/^CYCLE95\s*\(\s*"?([A-Z0-9_]+):([A-Z0-9_]+)"?\s*,(.*)\)/))) { cycle95(m[1], m[2], m[3].split(',').map((v) => parseFloat(v)), line); continue; }
+      const t = c.match(/T\s*(\d+)/); if (t) tool = +t[1];
+      const f = c.match(/(?:^|\s)F\s*=?\s*(\d*\.?\d+)/); if (f) feed = 'F' + f[1];
+      const s = c.match(/(?:^|\s)S\s*(\d+)/); if (s) speed = (/G96/.test(c) ? 'G96 S' : 'G97 S') + s[1];
+      if (/M0?3\b/.test(c)) spindle = 'M03'; if (/M0?4\b/.test(c)) spindle = 'M04'; if (/M0?5\b/.test(c)) spindle = '';
+      if (/^G75\b/.test(c)) { push(HOME, 'rapid', line); continue; }
+      const g = c.match(/G0?([0-3])(?!\d)/); if (g) mode = +g[1];
+      const x = c.match(/X\s*(=\s*[^ ]+|-?\d*\.?\d+)/), z = c.match(/Z\s*(=\s*[^ ]+|-?\d*\.?\d+)/), cr = c.match(/CR\s*=\s*(-?\d*\.?\d+)/);
+      const val = (v) => v[1].startsWith('=') ? evalExpr(v[1].slice(1), R) : +v[1];
+      if (x || z) {
+        const to = { z: z ? val(z) : pos.z, r: x ? val(x) / 2 : pos.r };
+        if (mode >= 2 && cr) { let p = { ...pos }; const pts = arcPoints(pos, to, +cr[1], mode === 2); pts.forEach((q) => { pos = p; push(q, 'cut', line); p = q; }); }
+        else push(to, mode === 0 ? 'rapid' : 'cut', line);
+        continue;
+      }
+      const stop = /\bM0?0\b/.test(c) ? 'M00' : /\bM30\b/.test(c) ? 'M30' : '';
+      moves.push({ kind: 'mark', line, stop, from: { ...pos }, to: { ...pos }, tool, spindle, feed, speed });
+      if (stop === 'M30') break;
+    }
+    return moves;
+
+    function cycle95(n1, n2, p, line) {
+      const els = contourFrom(n1, n2); CONTOUR = els;
+      const MID = p[0] || 1, FALZ = p[1] || 0, FALX = p[2] || 0, VARI = p[7] || 9;
+      const start = { ...pos };
+      const zs = []; els.forEach((e) => e.pts.forEach((q) => zs.push(q.z)));
+      const zMax = Math.max(...zs), zMin = Math.min(...zs);
+      if (VARI <= 4 || VARI >= 9) {                              // roughing: 1–4 rough, 9–12 rough + finish
+        const top = start.r - 0.5;
+        for (let lev = top - MID; lev > 0; lev -= MID) {
+          // cut along every interval where the contour (+ allowance) is below this level
+          let inCut = false, zA = 0;
+          const step = 0.05, segs = [];
+          for (let z = zMax + 1; z >= zMin - step; z -= step) {
+            const pr = z > zMax ? -1 : profileR(els, z);
+            const below = z >= zMin && (pr < 0 || pr + FALX < lev);
+            if (below && !inCut) { inCut = true; zA = z; }
+            if ((!below || z < zMin) && inCut) { inCut = false; segs.push([zA, z + step + FALZ]); }
+          }
+          if (inCut) segs.push([zA, zMin + FALZ]);
+          segs.forEach(([a, b]) => {
+            if (a - b < 0.1) return;
+            push({ z: a + 0.5, r: lev + 1 }, 'rapid', line, { cycle: true });
+            push({ z: a, r: lev }, 'cut', line, { cycle: true });
+            push({ z: b, r: lev }, 'cut', line, { cycle: true });
+            push({ z: b + 0.5, r: lev + 1 }, 'cut', line, { cycle: true });
+          });
+          if (lev - MID < 0) break;
+        }
+      }
+      if (VARI >= 5) {                                           // finishing along the contour
+        const s0 = els[0].pts[0];
+        push({ z: pos.z, r: start.r }, 'rapid', line, { cycle: true });
+        push({ z: s0.z + 1, r: start.r }, 'rapid', line, { cycle: true });
+        push({ z: s0.z + 1, r: s0.r }, 'rapid', line, { cycle: true });
+        push(s0, 'cut', els[0].line, { cycle: true, seg: els[0].line });
+        els.slice(1).forEach((e) => e.pts.forEach((q) => push(q, 'cut', e.line, { cycle: true, seg: e.line })));
+      }
+      push({ z: pos.z, r: start.r }, 'rapid', line, { cycle: true });
+      push(start, 'rapid', line, { cycle: true });
+    }
+  }
+  let CONTOUR = null;
+  const MOVES = run();
+  if (!CONTOUR) {                                                // contour for the profile view even without CYCLE95
+    const n = Object.keys(labelAt).filter((k) => !/^N\d/.test(k));
+    if (n.length >= 2) CONTOUR = contourFrom(n[0], n[1]);
+  }
+
+  /* ---------- page parts ---------- */
+  const zs = []; (CONTOUR || []).forEach((e) => e.pts.forEach((q) => zs.push(q.z)));
+  const rs = []; (CONTOUR || []).forEach((e) => e.pts.forEach((q) => rs.push(q.r)));
+  const PART_Z = Math.min(...zs), STOCK_R = Math.max(...rs) + 0.0;
+  const STOCK_Z_END = PART_Z - 18;                                 // bar continues into the chuck
+
+  host.innerHTML = `
+    <div class="sim-view" id="sim-view"><p class="sim-msg">Loading the simulation…</p></div>
+    <div class="sim-bar" role="toolbar" aria-label="Simulation controls">
+      <button type="button" class="sim-btn sim-play" aria-pressed="false">▶ Play</button>
+      <button type="button" class="sim-btn sim-step" title="Run one block">Single block</button>
+      <button type="button" class="sim-btn sim-reset">⟲ Reset</button>
+      <label class="sim-speed">Speed <select><option value="1">1×</option><option value="3" selected>3×</option><option value="8">8×</option><option value="20">20×</option></select></label>
+    </div>
+    <div class="sim-dro" aria-live="off"><span>X <b class="d-x">–</b></span><span>Z <b class="d-z">–</b></span><span class="d-t">T–</span><span class="d-s"></span><span class="d-f"></span><span class="d-msg"></span></div>
+    <div class="sim-cols">
+      <ol class="sim-code" aria-label="CNC program – tap a contour block to see it on the profile"></ol>
+      <figure class="sim-prof"><svg class="sim-svg" aria-label="Contour AB to BC – tap a segment to find its block"></svg><figcaption>Contour (AB … BC) – tap a line here or a block in the program</figcaption></figure>
+    </div>`;
+  pre.hidden = true;
+  const $ = (s) => host.querySelector(s);
+  const codeOl = $('.sim-code'), svg = $('.sim-svg');
+  const segLines = new Set((CONTOUR || []).filter((e) => !e.start).map((e) => e.line));
+  SRC.forEach((l, i) => {
+    const li = document.createElement('li'); li.dataset.line = i;
+    li.textContent = l || ' ';
+    if (segLines.has(i)) li.classList.add('is-seg');
+    if (/^\s*;/.test(l)) li.classList.add('is-note');
+    codeOl.appendChild(li);
+  });
+  const liAt = (i) => codeOl.children[i];
+
+  /* profile SVG (half above the axis solid, mirror below faint) */
+  if (CONTOUR) {
+    const pad = 2, z0 = PART_Z - pad, z1 = 1 + pad, rMax = STOCK_R + pad;
+    const W = z1 - z0, H = 2 * rMax;
+    svg.setAttribute('viewBox', `${z0} ${-rMax} ${W} ${H}`);
+    const P = (q) => `${q.z.toFixed(3)} ${(-q.r).toFixed(3)}`;
+    const M = (q) => `${q.z.toFixed(3)} ${q.r.toFixed(3)}`;
+    let all = '', mirror = '';
+    let prev = CONTOUR[0].pts[0];
+    const parts = [];
+    CONTOUR.slice(1).forEach((e) => {
+      const d = 'M' + P(prev) + e.pts.map((q) => ' L' + P(q)).join('');
+      mirror += 'M' + M(prev) + e.pts.map((q) => ' L' + M(q)).join('');
+      parts.push(`<path class="seg" data-line="${e.line}" d="${d}"/><path class="hit" data-line="${e.line}" d="${d}"/>`);
+      prev = e.pts[e.pts.length - 1];
+    });
+    svg.innerHTML = `<line class="axis" x1="${z0}" y1="0" x2="${z1}" y2="0"/><path class="mirror" d="${mirror}"/>${parts.join('')}`;
+    svg.style.setProperty('--sw', (W / 300).toFixed(3));
+  }
+  function pickSeg(line, scroll) {
+    host.querySelectorAll('.sim-svg .seg.on, .sim-code li.picked').forEach((n) => n.classList.remove('on', 'picked'));
+    if (line == null) return;
+    svg.querySelectorAll(`.seg[data-line="${line}"]`).forEach((n) => n.classList.add('on'));
+    const li = liAt(line); if (li) { li.classList.add('picked'); if (scroll) li.scrollIntoView({ block: 'nearest' }); }
+  }
+  codeOl.addEventListener('click', (e) => { const li = e.target.closest('li'); if (li && li.classList.contains('is-seg')) pickSeg(+li.dataset.line, false); });
+  svg.addEventListener('click', (e) => { const p = e.target.closest('[data-line]'); if (p) pickSeg(+p.dataset.line, true); });
+
+  /* ---------- 3D (Three.js, shared with the model viewer) ---------- */
+  // Full Three.js as an ES module (the model viewer's bundle has only what the viewer needs).
+  // The page's import map points "three" at js/vendor/three/three.module.min.js.
+  function need3D(cb) {
+    Promise.all([import('three'), import(jsBase + 'vendor/three/addons/controls/OrbitControls.js'),
+      import(jsBase + 'vendor/three/addons/environments/RoomEnvironment.js')])
+      .then(([T, oc, re]) => cb(T, { OrbitControls: oc.OrbitControls, RoomEnvironment: re.RoomEnvironment }))
+      .catch(() => { $('.sim-msg').textContent = 'The simulation could not be loaded.'; });
+  }
+  const io = new IntersectionObserver((en) => { if (en[0].isIntersecting) { io.disconnect(); need3D(start); } }, { rootMargin: '300px' });
+  io.observe(host);
+
+  function start(T, X) {
+    const view = $('#sim-view');
+    let renderer;
+    try { renderer = new T.WebGLRenderer({ antialias: true, alpha: true }); } catch { $('.sim-msg').textContent = 'WebGL is not available on this device.'; return; }
+    view.innerHTML = ''; view.appendChild(renderer.domElement);
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+    const scene = new T.Scene();
+    scene.environment = new T.PMREMGenerator(renderer).fromScene(new X.RoomEnvironment(), 0.04).texture;
+    scene.add(new T.HemisphereLight(0xffffff, 0x444444, 1.2));
+    const dl = new T.DirectionalLight(0xffffff, 1.4); dl.position.set(20, 40, 30); scene.add(dl);
+    const camera = new T.PerspectiveCamera(30, 1, 0.1, 2000);
+    const midZ = (PART_Z + 2) / 2;
+    camera.position.set(midZ + 2, 16 + STOCK_R, 64 + STOCK_R * 3.2);
+    const controls = new X.OrbitControls(camera, renderer.domElement);
+    controls.target.set(midZ - 4, 3, 0); controls.enableDamping = true; controls.update();
+
+    // world: X = machine Z (to the right), Y = radius (up)
+    const steel = new T.MeshStandardMaterial({ color: 0xc4c9ce, metalness: 0.9, roughness: 0.32 });
+    const chuckM = new T.MeshStandardMaterial({ color: 0x3a3a40, metalness: 0.6, roughness: 0.5 });
+    const chuck = new T.Mesh(new T.CylinderGeometry(STOCK_R * 2.4, STOCK_R * 2.4, 14, 40), chuckM);
+    chuck.rotation.z = Math.PI / 2; chuck.position.x = STOCK_Z_END - 7; scene.add(chuck);
+
+    // material: radius per 0.05 mm cell
+    const DZ = 0.05, ZTOP = 1, N = Math.round((ZTOP - STOCK_Z_END) / DZ) + 1;
+    let mat;
+    const zOf = (k) => ZTOP - k * DZ, kOf = (z) => Math.round((ZTOP - z) / DZ);
+    function resetMat() { mat = new Float32Array(N); for (let k = 0; k < N; k++) mat[k] = zOf(k) <= 0.5 ? STOCK_R : 0; }
+    resetMat();
+    let part = null, dirty = true;
+    const spin = new T.Group(); scene.add(spin);
+    function rebuild() {
+      const pts = [new T.Vector2(0, ZTOP)];
+      for (let k = 0; k < N; k += 2) pts.push(new T.Vector2(Math.max(mat[k], 0.001), zOf(k)));
+      pts.push(new T.Vector2(0, STOCK_Z_END));
+      const g = new T.LatheGeometry(pts, 56); g.rotateZ(-Math.PI / 2);   // axis along world X
+      g.computeVertexNormals();
+      if (part) { part.geometry.dispose(); part.geometry = g; } else { part = new T.Mesh(g, steel); spin.add(part); }
+      dirty = false;
+    }
+    // tools
+    const toolMats = { 1: 0xd9a383, 7: 0xe4007f, 3: 0x7fb3ff, 4: 0xaaaaaa };
+    const tools = {};
+    function makeTool(n) {
+      const g = new T.Group(), m = new T.MeshStandardMaterial({ color: toolMats[n] || 0xd9a383, metalness: 0.3, roughness: 0.5 });
+      if (n === 3) { const b = new T.Mesh(new T.BoxGeometry(3, 16, 4), m); b.position.set(-1.5, 8, 0); g.add(b); }
+      else if (n === 4) { const c = new T.Mesh(new T.CylinderGeometry(4, 4, 18, 24), m); c.rotation.z = Math.PI / 2; c.position.set(9, 0, 0); g.add(c); }
+      else {
+        const sh = new T.Shape(); const a = n === 7 ? 0.31 : 0.7;   // insert tip angle (35° / 80°)
+        sh.moveTo(0, 0); sh.lineTo(6 * Math.cos(Math.PI / 2 - a / 2 + 0.6), 6); sh.lineTo(7, 9); sh.lineTo(9, 4); sh.lineTo(0, 0);
+        const ins = new T.Mesh(new T.ExtrudeGeometry(sh, { depth: 2, bevelEnabled: false }), m); ins.position.z = -1; g.add(ins);
+        const hold = new T.Mesh(new T.BoxGeometry(6, 18, 5), new T.MeshStandardMaterial({ color: 0x2a2a2e, metalness: 0.5, roughness: 0.5 }));
+        hold.position.set(7, 16, 0); g.add(hold);
+      }
+      g.visible = false; scene.add(g); return g;
+    }
+    // tool path trace
+    const pathCut = [], pathRap = [];
+    const lineCut = new T.LineSegments(new T.BufferGeometry(), new T.LineBasicMaterial({ color: 0xd9a383 }));
+    const lineRap = new T.LineSegments(new T.BufferGeometry(), new T.LineDashedMaterial({ color: 0x8a8a8a, dashSize: 0.8, gapSize: 0.6 }));
+    scene.add(lineCut, lineRap);
+    function flushPaths() {
+      lineCut.geometry.setAttribute('position', new T.Float32BufferAttribute(pathCut, 3));
+      lineRap.geometry.setAttribute('position', new T.Float32BufferAttribute(pathRap, 3)); lineRap.computeLineDistances();
+    }
+
+    function cut(tool, q) {                           // remove material at the tool tip q = {z, r}
+      if (tool === 4 || tool === 0) return;
+      let a, b;
+      if (tool === 3) { a = q.z - 3; b = q.z; }                 // parting blade, 3 mm wide, reference on its right edge
+      else { a = q.z; b = q.z + (tool === 1 ? 0.8 : 0.12); }   // facing tool clears the face; the profile tool cuts at its tip
+      const k0 = Math.max(0, kOf(b)), k1 = Math.min(N - 1, kOf(a));
+      for (let k = k0; k <= k1; k++) if (mat[k] > q.r) { mat[k] = Math.max(q.r, 0); dirty = true; }
+    }
+
+    /* playback */
+    let idx = 0, along = 0, playing = false, stepTo = -1, speedF = 3, last = 0, spinOn = false;
+    const dro = { x: $('.d-x'), z: $('.d-z'), t: $('.d-t'), s: $('.d-s'), f: $('.d-f'), m: $('.d-msg') };
+    let curLine = -1, tip = { ...HOME };
+    function showLine(l, seg) {
+      if (l === curLine) return; curLine = l;
+      codeOl.querySelectorAll('li.run').forEach((n) => n.classList.remove('run'));
+      const li = liAt(l); if (li) { li.classList.add('run'); const top = li.offsetTop; if (top < codeOl.scrollTop || top > codeOl.scrollTop + codeOl.clientHeight - 30) codeOl.scrollTop = top - codeOl.clientHeight / 3; }
+      svg.querySelectorAll('.seg.run').forEach((n) => n.classList.remove('run'));
+      if (seg != null) svg.querySelectorAll(`.seg[data-line="${seg}"]`).forEach((n) => n.classList.add('run'));
+    }
+    function placeTool(m, q) {
+      Object.values(tools).forEach((g) => { g.visible = false; });
+      if (m.tool) { const g = tools[m.tool] || (tools[m.tool] = makeTool(m.tool)); g.visible = true; g.position.set(q.z, q.r, 0); }
+      dro.x.textContent = (q.r * 2).toFixed(3); dro.z.textContent = q.z.toFixed(3);
+      dro.t.textContent = m.tool ? `T${m.tool} D1` : 'T–'; dro.s.textContent = m.speed + (m.spindle ? ' ' + m.spindle : '');
+      dro.f.textContent = m.kind === 'rapid' ? 'G00 rapid' : m.feed; spinOn = !!m.spindle;
+    }
+    function reset() {
+      idx = 0; along = 0; playing = false; stepTo = -1; resetMat(); dirty = true;
+      pathCut.length = 0; pathRap.length = 0; flushPaths();
+      $('.sim-play').textContent = '▶ Play'; $('.sim-play').setAttribute('aria-pressed', 'false'); dro.m.textContent = '';
+      tip = { ...HOME }; curLine = -1; placeTool(MOVES[0] || { tool: 0, speed: '', spindle: '', feed: '' }, tip); showLine(MOVES[0] ? MOVES[0].line : 0, null);
+    }
+    function advance(dist) {
+      while (dist > 0 && idx < MOVES.length) {
+        const m = MOVES[idx];
+        showLine(m.line, m.seg); if (m.kind === 'mark') {
+          placeTool(m, m.to);
+          if (m.stop === 'M00') { dro.m.textContent = 'M00 – program stop: press Play to go on'; idx++; return 'stop'; }
+          if (m.stop === 'M30') { dro.m.textContent = 'M30 – program end'; idx++; return 'end'; }
+          idx++; along = 0; continue;
+        }
+        const L = Math.hypot(m.to.z - m.from.z, m.to.r - m.from.r), v = m.kind === 'rapid' ? 6 : 1;
+        const need = (L - along) / v;
+        const go = Math.min(dist, need); dist -= go; const prev = along; along += go * v;
+        const t0 = L ? prev / L : 1, t1 = L ? Math.min(along / L, 1) : 1;
+        const n = Math.max(1, Math.ceil((t1 - t0) * L / 0.04));
+        for (let k = 1; k <= n; k++) {
+          const t = t0 + (t1 - t0) * k / n, q = { z: m.from.z + (m.to.z - m.from.z) * t, r: m.from.r + (m.to.r - m.from.r) * t };
+          if (m.kind === 'cut') cut(m.tool, q);
+          tip = q;
+        }
+        const a = { z: m.from.z + (m.to.z - m.from.z) * t0, r: m.from.r + (m.to.r - m.from.r) * t0 };
+        (m.kind === 'rapid' ? pathRap : pathCut).push(a.z, a.r, 0.05, tip.z, tip.r, 0.05);
+        placeTool(m, tip);
+        if (along >= L - 1e-9) { idx++; along = 0; if (stepTo >= 0 && (idx >= MOVES.length || MOVES[idx].line !== m.line)) { stepTo = -1; flushPaths(); return 'step'; } }
+      }
+      flushPaths();
+      if (idx >= MOVES.length) return 'end';
+      return '';
+    }
+    function setPlay(on) { playing = on; $('.sim-play').textContent = on ? '❚❚ Pause' : '▶ Play'; $('.sim-play').setAttribute('aria-pressed', String(on)); }
+    $('.sim-play').addEventListener('click', () => { if (idx >= MOVES.length) reset(); setPlay(!playing); if (playing) dro.m.textContent = ''; });
+    $('.sim-step').addEventListener('click', () => { if (idx >= MOVES.length) reset(); setPlay(false); stepTo = idx; dro.m.textContent = ''; let r = ''; let guard = 0; while (stepTo >= 0 && guard++ < 100000) { r = advance(0.5); if (r) break; } stepTo = -1; if (dirty) rebuild(); });
+    $('.sim-reset').addEventListener('click', reset);
+    $('.sim-speed select').addEventListener('change', (e) => { speedF = +e.target.value; });
+
+    function size() { const w = view.clientWidth, h = view.clientHeight; renderer.setSize(w, h, false); camera.aspect = w / h; camera.updateProjectionMatrix(); }
+    new ResizeObserver(size).observe(view); size();
+    reset(); rebuild();
+    let lastBuild = 0;
+    renderer.setAnimationLoop((now) => {
+      const dt = last ? Math.min((now - last) / 1000, 0.05) : 0; last = now;
+      if (playing) {
+        const r = advance(dt * 12 * speedF);                  // 12 mm/s of feed at 1×, rapids 6× faster
+        if (r === 'stop' || r === 'end') setPlay(false);
+      }
+      if (spinOn) spin.rotation.x += dt * 12;
+      if (dirty && now - lastBuild > 60) { rebuild(); lastBuild = now; }
+      controls.update(); renderer.render(scene, camera);
+    });
+  }
+})();

@@ -402,7 +402,6 @@ html.sheet-open { overflow: hidden; }
 
 .feedback { margin-top: 32px; }
 .feedback h2 { margin-bottom: 4px; }
-
 /* ==== CNC Lathe: operating notes and programming ==== */
 .notes h3 { margin: 1.6rem 0 .6rem; font-size: 1.25rem; }
 .notes-lead { margin-bottom: .5rem; }
@@ -471,3 +470,40 @@ html.sheet-open { overflow: hidden; }
 .viva-score b { font-size: 1.25rem; color: var(--copper-light); }
 .viva-score.viva-warn { background: rgba(229, 72, 77, .1); border-color: #E5484D; }
 @media print { .viva-bar { display: none; } }
+/* ==== CNC simulation ==== */
+.sim { margin-top: 12px; display: grid; gap: 10px; }
+.sim-view { position: relative; height: clamp(260px, 56vw, 460px); border: 1px solid var(--line); border-radius: var(--radius);
+  background: radial-gradient(ellipse at 50% 35%, var(--viewer-glow, #3a3439) 0%, var(--surface) 55%, var(--code) 100%); overflow: hidden; touch-action: none; }
+.sim-view canvas { display: block; width: 100%; height: 100%; }
+.sim-msg { position: absolute; inset: 0; display: grid; place-items: center; margin: 0; color: var(--muted); }
+.sim-bar { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+.sim-btn { min-height: 40px; padding: 0 14px; border: 1px solid var(--line); border-radius: 999px; background: var(--surface); color: var(--heading); font: inherit; font-weight: 600; cursor: pointer; }
+.sim-btn:hover { border-color: var(--line-strong); }
+.sim-play { background: var(--copper); border-color: var(--copper); color: var(--on-copper); }
+.sim-speed { margin-left: auto; display: inline-flex; align-items: center; gap: 6px; color: var(--muted); font-size: .9rem; }
+.sim-speed select { min-height: 36px; border: 1px solid var(--line); border-radius: 8px; background: var(--surface); color: var(--heading); font: inherit; padding: 0 6px; }
+.sim-dro { display: flex; flex-wrap: wrap; gap: 6px 16px; padding: 8px 12px; border: 1px solid var(--line); border-radius: var(--radius); background: var(--code);
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: .9rem; color: var(--muted); }
+.sim-dro b { color: var(--heading); font-weight: 700; display: inline-block; min-width: 7ch; }
+.sim-dro .d-msg { flex-basis: 100%; color: var(--copper-light); }
+.sim-dro .d-msg:empty { display: none; }
+.sim-cols { display: grid; gap: 10px; }
+@media (min-width: 760px) { .sim-cols { grid-template-columns: 1fr 1fr; } }
+.sim-code { margin: 0; padding: 6px 0; max-height: 320px; overflow: auto; list-style: none; counter-reset: ln; border: 1px solid var(--line); border-radius: var(--radius); background: var(--code);
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: .85rem; line-height: 1.55; position: relative; }
+.sim-code li { counter-increment: ln; padding: 0 10px 0 0; white-space: pre; color: var(--text); border-left: 3px solid transparent; }
+.sim-code li::before { content: counter(ln); display: inline-block; width: 3.2ch; margin-right: 1ch; text-align: right; color: var(--muted); opacity: .6; }
+.sim-code li.is-note { color: var(--muted); }
+.sim-code li.is-seg { cursor: pointer; color: var(--copper-light); }
+.sim-code li.picked { background: rgba(127, 179, 255, .16); border-left-color: #7fb3ff; }
+.sim-code li.run { background: var(--copper-tint); border-left-color: var(--brand); color: var(--heading); }
+.sim-prof { margin: 0; padding: 8px; border: 1px solid var(--line); border-radius: var(--radius); background: var(--surface); }
+.sim-svg { display: block; width: 100%; height: auto; max-height: 300px; }
+.sim-svg .axis { stroke: var(--muted); stroke-width: calc(var(--sw) * .5); stroke-dasharray: calc(var(--sw) * 8) calc(var(--sw) * 3); }
+.sim-svg .mirror { fill: none; stroke: var(--line-strong); stroke-width: calc(var(--sw) * .8); }
+.sim-svg .seg { fill: none; stroke: var(--copper-light); stroke-width: var(--sw); stroke-linecap: round; stroke-linejoin: round; pointer-events: none; }
+.sim-svg .seg.on { stroke: #7fb3ff; stroke-width: calc(var(--sw) * 2.4); }
+.sim-svg .seg.run { stroke: var(--brand); stroke-width: calc(var(--sw) * 2.4); }
+.sim-svg .hit { fill: none; stroke: transparent; stroke-width: calc(var(--sw) * 8); cursor: pointer; }
+.sim-prof figcaption { margin-top: 6px; font-size: .8rem; color: var(--muted); }
+@media print { .sim { display: none; } .sim + pre, pre.program[hidden] { display: block !important; } }
