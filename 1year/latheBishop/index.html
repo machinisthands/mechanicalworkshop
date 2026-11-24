@@ -137,10 +137,10 @@
 <h2 id="codes-h">G &amp; M Codes</h2>
 <p class="notes-lead">The codes used in the CNC program below.</p>
 <h3>Preparatory functions (G codes)</h3>
-<dl class="codes"><dt>G00</dt><dd>Rapid positioning<br><code>G00 X10 Y10</code> · <code>G00 Z10</code></dd><dt>G01</dt><dd>Linear interpolation<br><code>G01 X10 Y10 F100</code></dd><dt>G02</dt><dd>Circular interpolation, clockwise (CW)<br><code>G01 X0 Y0</code> → <code>G02 X10 Y0 R5</code></dd><dt>G03</dt><dd>Circular interpolation, counter-clockwise (CCW)<br><code>G01 X0 Y0</code> → <code>G03 X10 Y0 R5</code></dd><dt>G70</dt><dd>Dimensions in inch</dd><dt>G71</dt><dd>Dimensions in mm</dd><dt>G75</dt><dd>Home position</dd></dl>
+<dl class="codes"><dt>G00</dt><dd>Rapid positioning</dd><dt>G01</dt><dd>Linear interpolation</dd><dt>G02</dt><dd>Circular interpolation, clockwise (CW)</dd><dt>G03</dt><dd>Circular interpolation, counter-clockwise (CCW)</dd><dt>G70</dt><dd>Dimensions in inch</dd><dt>G71</dt><dd>Dimensions in mm</dd><dt>G75</dt><dd>Home position</dd><dt>G96</dt><dd>Constant cutting speed</dd></dl>
 
 <h3>Miscellaneous functions (M codes)</h3>
-<dl class="codes"><dt>M03</dt><dd>Spindle clockwise (CW)</dd><dt>M04</dt><dd>Spindle counter-clockwise (CCW)</dd><dt>M05</dt><dd>Spindle stop</dd><dt>M06</dt><dd>Tool change (<code>T1 M06</code>)</dd><dt>M08</dt><dd>Coolant ON</dd><dt>M09</dt><dd>Coolant OFF</dd><dt>M30</dt><dd>Program end and reset</dd></dl>
+<dl class="codes"><dt>M03</dt><dd>Spindle clockwise (CW)</dd><dt>M04</dt><dd>Spindle counter-clockwise (CCW)</dd><dt>M05</dt><dd>Spindle stop</dd><dt>M06</dt><dd>Tool change</dd><dt>M08</dt><dd>Coolant ON</dd><dt>M09</dt><dd>Coolant OFF</dd><dt>M30</dt><dd>Program end and reset</dd></dl>
 
 <h3>Other words</h3>
 <dl class="codes"><dt>T</dt><dd>Tool selection</dd><dt>S</dt><dd>Spindle speed in rpm</dd><dt>F</dt><dd>Feed in mm/rev</dd><dt>CR</dt><dd>Radius of circle</dd><dt>D</dt><dd>Offset number</dd><dt>CYCLE95</dt><dd>Stock removal cycle</dd></dl>
@@ -261,11 +261,11 @@ BC:</code></pre>
 <label><input type="radio" name="q3" value="2"> <span>The length of the work</span></label>
 <label><input type="radio" name="q3" value="3"> <span>The tool number</span></label>
 <p class="viva-why" hidden>For the X axis you enter the diameter and save the position (Length 1). For the Z axis you enter zero (Length 2).</p></fieldset>
-<fieldset class="viva-q" data-answer="2"><legend><span class="viva-n">4.</span> What does <code>CYCLE95</code> do?</legend>
-<label><input type="radio" name="q4" value="0"> <span>Roughing only</span></label>
-<label><input type="radio" name="q4" value="1"> <span>Finishing only</span></label>
-<label><input type="radio" name="q4" value="2"> <span>Stock removal along the contour – roughing, finishing or both</span></label>
-<label><input type="radio" name="q4" value="3"> <span>Thread cutting</span></label>
+<fieldset class="viva-q" data-answer="0"><legend><span class="viva-n">4.</span> What does <code>CYCLE95</code> do?</legend>
+<label><input type="radio" name="q4" value="0"> <span>Stock removal cycle</span></label>
+<label><input type="radio" name="q4" value="1"> <span>Drilling cycle</span></label>
+<label><input type="radio" name="q4" value="2"> <span>Tapping cycle</span></label>
+<label><input type="radio" name="q4" value="3"> <span>Thread cutting cycle</span></label>
 <p class="viva-why" hidden>CYCLE95 removes the stock along the contour between the labels AB and BC. The machining type decides the work: 1 = roughing, 5 = finishing, 9 = roughing and finishing. This program uses 9.</p></fieldset>
 <fieldset class="viva-q" data-answer="1"><legend><span class="viva-n">5.</span> During simulation and the first run, why do we keep a hand on Reset?</legend>
 <label><input type="radio" name="q5" value="0"> <span>To change the tool</span></label>
