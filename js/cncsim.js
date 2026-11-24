@@ -209,7 +209,7 @@
     svg.setAttribute('viewBox', `${z0} ${-rMax} ${W} ${H}`);
     const P = (q) => `${q.z.toFixed(3)} ${(-q.r).toFixed(3)}`;
     const M = (q) => `${q.z.toFixed(3)} ${q.r.toFixed(3)}`;
-    let all = '', mirror = '';
+    let mirror = '';
     let prev = CONTOUR[0].pts[0];
     const parts = [];
     CONTOUR.slice(1).forEach((e) => {
