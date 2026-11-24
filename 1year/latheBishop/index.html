@@ -143,7 +143,7 @@
 <dl class="codes"><dt>M03</dt><dd>Spindle clockwise (CW)</dd><dt>M04</dt><dd>Spindle counter-clockwise (CCW)</dd><dt>M05</dt><dd>Spindle stop</dd><dt>M06</dt><dd>Tool change (<code>T1 M06</code>)</dd><dt>M08</dt><dd>Coolant ON</dd><dt>M09</dt><dd>Coolant OFF</dd><dt>M30</dt><dd>Program end and reset</dd></dl>
 
 <h3>Other words</h3>
-<dl class="codes"><dt>T</dt><dd>Tool selection</dd><dt>S</dt><dd>Spindle speed in rpm</dd><dt>F</dt><dd>Feed in mm/rev</dd><dt>CR</dt><dd>Radius of circle</dd><dt>D</dt><dd>Offset number</dd><dt>CYCLE95</dt><dd>Stock removal (roughing) cycle</dd></dl>
+<dl class="codes"><dt>T</dt><dd>Tool selection</dd><dt>S</dt><dd>Spindle speed in rpm</dd><dt>F</dt><dd>Feed in mm/rev</dd><dt>CR</dt><dd>Radius of circle</dd><dt>D</dt><dd>Offset number</dd><dt>CYCLE95</dt><dd>Stock removal cycle along the contour. The machining type decides what it does: <b>1</b> = roughing, <b>5</b> = finishing, <b>9</b> = roughing and finishing. This program uses 9.</dd></dl>
 </section>
 <!-- /cnc-codes -->
 <section class="wrap" aria-labelledby="program-h">
@@ -261,12 +261,12 @@ BC:</code></pre>
 <label><input type="radio" name="q3" value="2"> <span>The length of the work</span></label>
 <label><input type="radio" name="q3" value="3"> <span>The tool number</span></label>
 <p class="viva-why" hidden>For the X axis you enter the diameter and save the position (Length 1). For the Z axis you enter zero (Length 2).</p></fieldset>
-<fieldset class="viva-q" data-answer="0"><legend><span class="viva-n">4.</span> What does <code>CYCLE95</code> do?</legend>
-<label><input type="radio" name="q4" value="0"> <span>Stock removal (roughing) along the contour</span></label>
-<label><input type="radio" name="q4" value="1"> <span>Thread cutting</span></label>
-<label><input type="radio" name="q4" value="2"> <span>Drilling</span></label>
-<label><input type="radio" name="q4" value="3"> <span>Returns to the home position</span></label>
-<p class="viva-why" hidden>CYCLE95 removes the stock along the contour given between the labels AB and BC.</p></fieldset>
+<fieldset class="viva-q" data-answer="2"><legend><span class="viva-n">4.</span> What does <code>CYCLE95</code> do?</legend>
+<label><input type="radio" name="q4" value="0"> <span>Roughing only</span></label>
+<label><input type="radio" name="q4" value="1"> <span>Finishing only</span></label>
+<label><input type="radio" name="q4" value="2"> <span>Stock removal along the contour – roughing, finishing or both</span></label>
+<label><input type="radio" name="q4" value="3"> <span>Thread cutting</span></label>
+<p class="viva-why" hidden>CYCLE95 removes the stock along the contour between the labels AB and BC. The machining type decides the work: 1 = roughing, 5 = finishing, 9 = roughing and finishing. This program uses 9.</p></fieldset>
 <fieldset class="viva-q" data-answer="1"><legend><span class="viva-n">5.</span> During simulation and the first run, why do we keep a hand on Reset?</legend>
 <label><input type="radio" name="q5" value="0"> <span>To change the tool</span></label>
 <label><input type="radio" name="q5" value="1"> <span>To stop the machine at once if it moves wrongly</span></label>
