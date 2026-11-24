@@ -269,9 +269,9 @@
     const dl = new T.DirectionalLight(0xffffff, 1.4); dl.position.set(20, 40, 30); scene.add(dl);
     const camera = new T.PerspectiveCamera(30, 1, 0.1, 2000);
     const midZ = (PART_Z + 2) / 2;
-    camera.position.set(midZ - 4, 20 + STOCK_R, 82 + STOCK_R * 3.6);
+    camera.position.set(midZ + 6, 30 + STOCK_R, 104 + STOCK_R * 3.8);
     const controls = new X.OrbitControls(camera, renderer.domElement);
-    controls.target.set(midZ - 10, 2, 0); controls.enableDamping = true; controls.update(); controls.saveState();
+    controls.target.set(midZ + 2, 9, 0); controls.enableDamping = true; controls.update(); controls.saveState();
 
     // world: X = machine Z (to the right), Y = radius (up)
     const steel = new T.MeshStandardMaterial({ color: 0xc4c9ce, metalness: 0.9, roughness: 0.32 });
@@ -315,18 +315,37 @@
       dirty = false;
     }
     // tools
-    const toolMats = { 1: 0xd9a383, 7: 0xe4007f, 3: 0x7fb3ff, 4: 0x111114 };   // stopper sleeve black, so it stands out from the bar
+    const toolMats = { 1: 0xd4af37, 7: 0xd4af37, 3: 0xd4af37, 4: 0x111114 };   // gold-coloured (coated carbide) inserts; stopper sleeve black so it stands out from the bar
     const tools = {};
+    /* Tools as on the machine (insert shapes from the holder codes):
+     *  T1 PCLNR 2020 K12 – 95° holder, CNMG 1204 insert (80° rhombic, 12.7 mm IC)
+     *  T7 MVJNR 2020 K16 – 93° holder, VNMG 1604 insert (35° rhombic, 9.525 mm IC)
+     *  T3 CFIR 2020 K06 – Seco MDT parting/grooving holder, LC..1606 insert, 6 mm wide
+     *  T4 sleeve (stopper) – black, its face 1 mm past its Z0 */
+    const PART_W = 6;
+    const holderM = new T.MeshStandardMaterial({ color: 0x2a2a2e, metalness: 0.5, roughness: 0.5 });
+    function rhombicInsert(kappaDeg, cornerDeg, ic, m) {
+      const k = kappaDeg * Math.PI / 180, c = cornerDeg * Math.PI / 180, L = ic / Math.sin(c);
+      const a1 = Math.PI - k, a2 = a1 - c;                         // main and minor edge directions from the tip (Z right, X up)
+      const P1 = [L * Math.cos(a1), L * Math.sin(a1)], P3 = [L * Math.cos(a2), L * Math.sin(a2)];
+      const sh = new T.Shape(); sh.moveTo(0, 0); sh.lineTo(P1[0], P1[1]); sh.lineTo(P1[0] + P3[0], P1[1] + P3[1]); sh.lineTo(P3[0], P3[1]); sh.lineTo(0, 0);
+      const ins = new T.Mesh(new T.ExtrudeGeometry(sh, { depth: 4.76, bevelEnabled: false }), m); ins.position.z = -2.38;
+      const cz = (P1[0] + P3[0]) / 2, cx = (P1[1] + P3[1]) / 2;   // insert centre
+      return { ins, cz, cx, top: Math.max(P1[1], P3[1], P1[1] + P3[1]) };
+    }
     function makeTool(n) {
-      const g = new T.Group(), m = new T.MeshStandardMaterial({ color: toolMats[n] || 0xd9a383, metalness: 0.3, roughness: 0.5 });
-      if (n === 3) { const b = new T.Mesh(new T.BoxGeometry(3, 16, 4), m); b.position.set(-1.5, 8, 0); g.add(b); }
-      else if (n === 4) { const c = new T.Mesh(new T.CylinderGeometry(4, 4, 18, 24), m); c.rotation.z = Math.PI / 2; c.position.set(SLEEVE + 9, 0, 0); g.add(c); }   // sleeve face 1 mm past its Z0
-      else {
-        const sh = new T.Shape(); const a = n === 7 ? 0.31 : 0.7;   // insert tip angle (35° / 80°)
-        sh.moveTo(0, 0); sh.lineTo(6 * Math.cos(Math.PI / 2 - a / 2 + 0.6), 6); sh.lineTo(7, 9); sh.lineTo(9, 4); sh.lineTo(0, 0);
-        const ins = new T.Mesh(new T.ExtrudeGeometry(sh, { depth: 2, bevelEnabled: false }), m); ins.position.z = -1; g.add(ins);
-        const hold = new T.Mesh(new T.BoxGeometry(6, 18, 5), new T.MeshStandardMaterial({ color: 0x2a2a2e, metalness: 0.5, roughness: 0.5 }));
-        hold.position.set(7, 16, 0); g.add(hold);
+      const g = new T.Group(), m = new T.MeshStandardMaterial({ color: toolMats[n] || 0xd9a383, metalness: 0.4, roughness: 0.45 });
+      if (n === 3) {                                               // 6 mm parting blade, reference on its right edge
+        const ins = new T.Mesh(new T.BoxGeometry(PART_W, 4, 5), m); ins.position.set(-PART_W / 2, 2, 0); g.add(ins);
+        const blade = new T.Mesh(new T.BoxGeometry(PART_W - 0.6, 22, 5), holderM); blade.position.set(-PART_W / 2, 4 + 11, 0); g.add(blade);
+        const shank = new T.Mesh(new T.BoxGeometry(20, 20, 20), holderM); shank.position.set(-PART_W / 2 + 7, 26 + 10, 0); g.add(shank);
+      } else if (n === 4) {
+        const c = new T.Mesh(new T.CylinderGeometry(5, 5, 24, 32), m); c.rotation.z = Math.PI / 2; c.position.set(SLEEVE + 0.05 + 12, 0, 0); g.add(c);
+      } else {
+        const r = n === 7 ? rhombicInsert(93, 35, 9.525, m) : rhombicInsert(95, 80, 12.7, m);
+        g.add(r.ins);
+        const shank = new T.Mesh(new T.BoxGeometry(20, 30, 20), holderM);   // 20 × 20 shank, square to the axis
+        shank.position.set(r.cz + 6, r.top + 15, 0); g.add(shank);
       }
       g.visible = false; scene.add(g); return g;
     }
@@ -343,7 +362,7 @@
     function cut(tool, q) {                           // remove material at the tool tip q = {z, r}
       if (tool === 4 || tool === 0) return;
       let a, b;
-      if (tool === 3) { a = q.z - 3; b = q.z; }                 // parting blade, 3 mm wide, reference on its right edge
+      if (tool === 3) { a = q.z - PART_W; b = q.z; }            // 6 mm parting blade (CFIR 2020 K06), reference on its right edge
       else { a = q.z; b = q.z + (tool === 1 ? 1.5 : 0.12); }   // facing tool clears the face; the profile tool cuts at its tip
       const k0 = Math.max(0, kOf(b)), k1 = Math.min(N - 1, kOf(a));
       for (let k = k0; k <= k1; k++) if (mat[k] > q.r) { mat[k] = Math.max(q.r, 0); dirty = true; }
