@@ -244,25 +244,53 @@
 
   function start(T, X) {
     const view = $('#sim-view');
-    let renderer;
-    try { renderer = new T.WebGLRenderer({ antialias: true, alpha: true }); } catch { $('.sim-msg').textContent = 'WebGL is not available on this device.'; return; }
+    // Phones allow only a few 3D views at a time (the model viewer above is one). Create ours gently,
+    // try again on a tap if the browser refuses, and recover when the browser takes the 3D view away.
+    let renderer = null;
+    const small = Math.min(window.innerWidth, window.innerHeight) < 700;
+    for (const opts of [{ antialias: !small, alpha: true, powerPreference: 'low-power' }, { antialias: false, alpha: true, powerPreference: 'low-power' }]) {
+      try { renderer = new T.WebGLRenderer(opts); break; } catch (e) { renderer = null; }
+    }
+    if (!renderer) {
+      $('.sim-msg').innerHTML = '<button type="button" class="sim-btn sim-retry">Tap to start the simulation</button>';
+      $('.sim-retry').addEventListener('click', () => start(T, X), { once: true });
+      return;
+    }
     view.innerHTML = ''; view.appendChild(renderer.domElement);
-    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 1.5));
+    const lost = document.createElement('button'); lost.type = 'button'; lost.className = 'sim-btn sim-lost'; lost.hidden = true;
+    lost.textContent = 'The browser paused the 3D view – tap to continue'; view.appendChild(lost);
+    renderer.domElement.addEventListener('webglcontextlost', (e) => { e.preventDefault(); lost.hidden = false; });
+    renderer.domElement.addEventListener('webglcontextrestored', () => { lost.hidden = true; dirty = true; });
+    lost.addEventListener('click', () => { lost.hidden = true; try { renderer.forceContextRestore(); } catch (e) { /* the browser restores it itself */ } });
     const scene = new T.Scene();
     scene.environment = new T.PMREMGenerator(renderer).fromScene(new X.RoomEnvironment(), 0.04).texture;
     scene.add(new T.HemisphereLight(0xffffff, 0x444444, 1.2));
     const dl = new T.DirectionalLight(0xffffff, 1.4); dl.position.set(20, 40, 30); scene.add(dl);
     const camera = new T.PerspectiveCamera(30, 1, 0.1, 2000);
     const midZ = (PART_Z + 2) / 2;
-    camera.position.set(midZ + 2, 16 + STOCK_R, 64 + STOCK_R * 3.2);
+    camera.position.set(midZ - 4, 20 + STOCK_R, 82 + STOCK_R * 3.6);
     const controls = new X.OrbitControls(camera, renderer.domElement);
-    controls.target.set(midZ - 4, 3, 0); controls.enableDamping = true; controls.update(); controls.saveState();
+    controls.target.set(midZ - 10, 2, 0); controls.enableDamping = true; controls.update(); controls.saveState();
 
     // world: X = machine Z (to the right), Y = radius (up)
     const steel = new T.MeshStandardMaterial({ color: 0xc4c9ce, metalness: 0.9, roughness: 0.32 });
-    const chuckM = new T.MeshStandardMaterial({ color: 0x3a3a40, metalness: 0.6, roughness: 0.5 });
-    const chuck = new T.Mesh(new T.CylinderGeometry(STOCK_R * 2.4, STOCK_R * 2.4, 14, 40), chuckM);
-    chuck.rotation.z = Math.PI / 2; chuck.position.x = STOCK_Z_END - 7; scene.add(chuck);
+    // Three-jaw chuck: body behind the bar, three stepped jaws 120° apart gripping it. It turns with the spindle.
+    const chuckM = new T.MeshStandardMaterial({ color: 0x3a3a40, metalness: 0.6, roughness: 0.45 });
+    const jawM = new T.MeshStandardMaterial({ color: 0x8d939a, metalness: 0.8, roughness: 0.35 });
+    const chuck = new T.Group();
+    const bodyR = STOCK_R * 2.6 + 6, face0 = STOCK_Z_END;            // chuck face where the bar leaves it
+    const body = new T.Mesh(new T.CylinderGeometry(bodyR, bodyR, 16, 48), chuckM);
+    body.rotation.z = Math.PI / 2; body.position.x = face0 - 8 - 2; chuck.add(body);
+    const jawH = bodyR - STOCK_R - 2;
+    for (let j = 0; j < 3; j++) {
+      const jaw = new T.Group();
+      const a = new T.Mesh(new T.BoxGeometry(12, jawH * 0.45, 7), jawM);      // gripping step, touches the bar
+      a.position.set(face0 + 4, STOCK_R + jawH * 0.225, 0);
+      const b = new T.Mesh(new T.BoxGeometry(7, jawH * 0.55, 7), jawM);       // outer step
+      b.position.set(face0 + 1.5, STOCK_R + jawH * 0.45 + jawH * 0.275, 0);
+      jaw.add(a, b); jaw.rotation.x = j * 2 * Math.PI / 3 + Math.PI / 2; chuck.add(jaw);
+    }
 
     // material: radius per 0.05 mm cell
     const DZ = 0.05, ZTOP = 1, N = Math.round((ZTOP - STOCK_Z_END) / DZ) + 1;
@@ -276,18 +304,18 @@
     function resetMat() { mat = new Float32Array(N); face = FACE0; pulling = false; fillTo(FACE0); }
     let part = null, dirty = true;
     resetMat();
-    const spin = new T.Group(); scene.add(spin);
+    const spin = new T.Group(); scene.add(spin); spin.add(chuck);
     function rebuild() {
       const pts = [new T.Vector2(0, ZTOP)];
-      for (let k = 0; k < N; k += 2) pts.push(new T.Vector2(Math.max(mat[k], 0.001), zOf(k)));
+      for (let k = 0; k < N; k += 3) pts.push(new T.Vector2(Math.max(mat[k], 0.001), zOf(k)));
       pts.push(new T.Vector2(0, STOCK_Z_END));
-      const g = new T.LatheGeometry(pts, 56); g.rotateZ(-Math.PI / 2);   // axis along world X
+      const g = new T.LatheGeometry(pts, 40); g.rotateZ(-Math.PI / 2);   // axis along world X
       g.computeVertexNormals();
       if (part) { part.geometry.dispose(); part.geometry = g; } else { part = new T.Mesh(g, steel); spin.add(part); }
       dirty = false;
     }
     // tools
-    const toolMats = { 1: 0xd9a383, 7: 0xe4007f, 3: 0x7fb3ff, 4: 0xaaaaaa };
+    const toolMats = { 1: 0xd9a383, 7: 0xe4007f, 3: 0x7fb3ff, 4: 0x111114 };   // stopper sleeve black, so it stands out from the bar
     const tools = {};
     function makeTool(n) {
       const g = new T.Group(), m = new T.MeshStandardMaterial({ color: toolMats[n] || 0xd9a383, metalness: 0.3, roughness: 0.5 });
@@ -388,7 +416,8 @@
     new ResizeObserver(size).observe(view); size();
     reset(); rebuild();
     let lastBuild = 0;
-    renderer.setAnimationLoop((now) => {
+    new IntersectionObserver((en) => { renderer.setAnimationLoop(en[0].isIntersecting ? loop : null); last = 0; }).observe(view);
+    function loop(now) {
       const dt = last ? Math.min((now - last) / 1000, 0.05) : 0; last = now;
       if (playing) {
         const r = advance(dt * 12 * speedF);                  // 12 mm/s of feed at 1×, rapids 6× faster
@@ -399,8 +428,8 @@
         if (face >= SLEEVE) { pulling = false; dro.m.textContent += ' – done. Press Play to go on.'; }
       }
       if (spinOn) spin.rotation.x += dt * 12;
-      if (dirty && now - lastBuild > 60) { rebuild(); lastBuild = now; }
+      if (dirty && now - lastBuild > 90) { rebuild(); lastBuild = now; }
       controls.update(); renderer.render(scene, camera);
-    });
+    }
   }
 })();

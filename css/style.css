@@ -476,6 +476,7 @@ html.sheet-open { overflow: hidden; }
   background: radial-gradient(ellipse at 50% 35%, var(--viewer-glow, #3a3439) 0%, var(--surface) 55%, var(--code) 100%); overflow: hidden; touch-action: none; }
 .sim-view canvas { display: block; width: 100%; height: 100%; }
 .sim-msg { position: absolute; inset: 0; display: grid; place-items: center; margin: 0; color: var(--muted); }
+.sim-lost { position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); z-index: 2; background: var(--surface); }
 .sim-bar { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
 .sim-btn { min-height: 40px; padding: 0 14px; border: 1px solid var(--line); border-radius: 999px; background: var(--surface); color: var(--heading); font: inherit; font-weight: 600; cursor: pointer; }
 .sim-btn:hover { border-color: var(--line-strong); }
