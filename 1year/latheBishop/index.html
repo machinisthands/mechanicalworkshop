@@ -137,13 +137,13 @@
 <h2 id="codes-h">G &amp; M Codes</h2>
 <p class="notes-lead">The codes used in the CNC program below.</p>
 <h3>Preparatory functions (G codes)</h3>
-<dl class="codes"><dt>G00</dt><dd>Rapid positioning</dd><dt>G01</dt><dd>Linear interpolation</dd><dt>G02</dt><dd>Circular interpolation, clockwise (CW)</dd><dt>G03</dt><dd>Circular interpolation, counter-clockwise (CCW)</dd><dt>G70</dt><dd>Dimensions in inch</dd><dt>G71</dt><dd>Dimensions in mm</dd><dt>G75</dt><dd>Home position</dd><dt>G96</dt><dd>Constant cutting speed (constant surface speed)</dd></dl>
+<dl class="codes"><dt>G00</dt><dd>Rapid positioning</dd><dt>G01</dt><dd>Linear interpolation</dd><dt>G02</dt><dd>Circular interpolation, clockwise (CW)</dd><dt>G03</dt><dd>Circular interpolation, counter-clockwise (CCW)</dd><dt>G70</dt><dd>Dimensions in inch</dd><dt>G71</dt><dd>Dimensions in mm</dd><dt>G75</dt><dd>Home position</dd><dt>G96</dt><dd>Constant cutting speed (constant surface speed)</dd><dt>G97</dt><dd>Constant spindle speed (rpm)</dd></dl>
 
 <h3>Miscellaneous functions (M codes)</h3>
-<dl class="codes"><dt>M03</dt><dd>Spindle clockwise (CW)</dd><dt>M04</dt><dd>Spindle counter-clockwise (CCW)</dd><dt>M05</dt><dd>Spindle stop</dd><dt>M06</dt><dd>Tool change</dd><dt>M08</dt><dd>Coolant ON</dd><dt>M09</dt><dd>Coolant OFF</dd><dt>M30</dt><dd>Program end and reset</dd></dl>
+<dl class="codes"><dt>M00</dt><dd>Program stop</dd><dt>M01</dt><dd>Optional stop</dd><dt>M03</dt><dd>Spindle clockwise (CW)</dd><dt>M04</dt><dd>Spindle counter-clockwise (CCW)</dd><dt>M05</dt><dd>Spindle stop</dd><dt>M06</dt><dd>Tool change</dd><dt>M08</dt><dd>Coolant ON</dd><dt>M09</dt><dd>Coolant OFF</dd><dt>M30</dt><dd>Program end and reset</dd></dl>
 
 <h3>Other words</h3>
-<dl class="codes"><dt>T</dt><dd>Tool selection</dd><dt>S</dt><dd>Spindle speed in rpm</dd><dt>F</dt><dd>Feed in mm/rev</dd><dt>CR</dt><dd>Radius of circle</dd><dt>D</dt><dd>Offset number</dd><dt>CYCLE95</dt><dd>Stock removal cycle</dd></dl>
+<dl class="codes"><dt>T</dt><dd>Tool selection</dd><dt>S</dt><dd>Spindle speed – rpm with G97; cutting speed in m/min with G96</dd><dt>F</dt><dd>Feed in mm/rev</dd><dt>CR</dt><dd>Radius of circle</dd><dt>D</dt><dd>Offset number</dd><dt>N</dt><dd>Block number (also used as a jump label)</dd><dt>R1</dt><dd>Variable (R parameter), e.g. <code>R1=20</code></dd><dt>IF … GOTO</dt><dd>Conditional jump – repeats blocks while the condition is true (the parting loop)</dd><dt>CYCLE95</dt><dd>Stock removal cycle</dd></dl>
 </section>
 <!-- /cnc-codes -->
 <section class="wrap" aria-labelledby="program-h">
@@ -233,7 +233,7 @@ BC:</code></pre>
 <div class="step-card"><h4>Running setup</h4><ol><li>Emergency ON (release the emergency button)</li><li>Press Reset</li></ol></div>
 <div class="step-card"><h4>Tool offset</h4><h5>X axis</h5><ol><li>Jog</li><li>Bring the tool to position (X axis)</li><li>Measure tool</li><li>Measure manual</li><li>Enter the diameter → Save position → Length 1</li><li>Back (twice)</li></ol><h5>Z axis</h5><ol><li>Bring the tool to position (Z axis)</li><li>Measure tool</li><li>Measure manual</li><li>Enter zero → Length 2</li><li>Back (twice)</li></ol></div>
 <div class="step-card"><h4>New program</h4><ol><li>Program manager</li><li>New</li><li>Enter any name</li><li>Input</li><li>Enter the program</li></ol></div>
-<div class="step-card"><h4>Simulation</h4><ol><li>MEM</li><li>Close the door</li><li>Simulation</li><li>Keep a hand on Reset and press Cycle Start</li></ol><p class="note-warn">⚠ Important: if the machine moves, press Reset.</p></div>
+<div class="step-card"><h4>Simulation</h4><ol><li>Program manager → select the program → Execute</li><li>MEM</li><li>Close the door</li><li>Simulation</li><li>Keep a hand on Reset and press Cycle Start</li></ol><p class="note-warn">⚠ Important: if the machine moves, press Reset.</p></div>
 <div class="step-card"><h4>Running the program</h4><ol><li>MEM</li><li>Close the door</li><li>Single block</li><li>Keep a hand on Reset and press Cycle Start</li></ol><p class="note-warn">⚠ Important: if there is any movement that is not in the program, press Reset.</p></div>
 </div>
 </section>
