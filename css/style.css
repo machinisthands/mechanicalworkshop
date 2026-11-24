@@ -155,9 +155,11 @@ p { margin: 0 0 1rem; }
    ========================================================================== */
 
 .job > section, .job > header { padding-top: 1.25rem; padding-bottom: 1.25rem; }
-.job > header { padding-top: 1.75rem; }
+.job > header { padding-top: 1.25rem; padding-bottom: .25rem; }
+.job > header + section { padding-top: .75rem; }
+.job .intro p:last-child { margin-bottom: 0; }
 .job > .wrap { max-width: 920px; }
-.job .intro { margin-top: 1rem; color: var(--text); }
+.job .intro { margin-top: .6rem; color: var(--text); }
 .job p { -webkit-hyphens: manual; hyphens: manual; }
 /* Year / semester label: copper, like the eyebrow on the WorldSkills site */
 .badge { display: inline-block; margin: 0 0 .25rem; padding: 3px 10px; border-radius: 6px; background: var(--copper-tint); color: var(--copper-light);

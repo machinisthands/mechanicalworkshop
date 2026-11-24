@@ -137,7 +137,7 @@
 <h2 id="codes-h">G &amp; M Codes</h2>
 <p class="notes-lead">The codes used in the CNC program below.</p>
 <h3>Preparatory functions (G codes)</h3>
-<dl class="codes"><dt>G00</dt><dd>Rapid positioning</dd><dt>G01</dt><dd>Linear interpolation</dd><dt>G02</dt><dd>Circular interpolation, clockwise (CW)</dd><dt>G03</dt><dd>Circular interpolation, counter-clockwise (CCW)</dd><dt>G70</dt><dd>Dimensions in inch</dd><dt>G71</dt><dd>Dimensions in mm</dd><dt>G75</dt><dd>Home position</dd><dt>G96</dt><dd>Constant cutting speed</dd></dl>
+<dl class="codes"><dt>G00</dt><dd>Rapid positioning</dd><dt>G01</dt><dd>Linear interpolation</dd><dt>G02</dt><dd>Circular interpolation, clockwise (CW)</dd><dt>G03</dt><dd>Circular interpolation, counter-clockwise (CCW)</dd><dt>G70</dt><dd>Dimensions in inch</dd><dt>G71</dt><dd>Dimensions in mm</dd><dt>G75</dt><dd>Home position</dd><dt>G96</dt><dd>Constant cutting speed (constant surface speed)</dd></dl>
 
 <h3>Miscellaneous functions (M codes)</h3>
 <dl class="codes"><dt>M03</dt><dd>Spindle clockwise (CW)</dd><dt>M04</dt><dd>Spindle counter-clockwise (CCW)</dd><dt>M05</dt><dd>Spindle stop</dd><dt>M06</dt><dd>Tool change</dd><dt>M08</dt><dd>Coolant ON</dd><dt>M09</dt><dd>Coolant OFF</dd><dt>M30</dt><dd>Program end and reset</dd></dl>
@@ -229,6 +229,7 @@ BC:</code></pre>
 <ol class="stages"><li>Machine instruction</li><li>Tooling</li><li>Program entry</li><li>Manufacturing</li></ol>
 <h3>Step by step</h3>
 <div class="step-grid">
+<div class="step-card"><h4>Safety first</h4><ol><li>Wear safety glasses and safety shoes. No loose clothes; tie back long hair.</li><li>Close the door before Cycle Start. Never open it or reach inside while the spindle is turning.</li></ol></div>
 <div class="step-card"><h4>Machine ON</h4><ol><li>Main panel ON</li><li>Stabilizer ON</li><li>Press the Start button</li><li>Machine main power ON</li></ol></div>
 <div class="step-card"><h4>Running setup</h4><ol><li>Emergency ON (release the emergency button)</li><li>Press Reset</li></ol></div>
 <div class="step-card"><h4>Tool offset</h4><h5>X axis</h5><ol><li>Jog</li><li>Bring the tool to position (X axis)</li><li>Measure tool</li><li>Measure manual</li><li>Enter the diameter → Save position → Length 1</li><li>Back (twice)</li></ol><h5>Z axis</h5><ol><li>Bring the tool to position (Z axis)</li><li>Measure tool</li><li>Measure manual</li><li>Enter zero → Length 2</li><li>Back (twice)</li></ol></div>
@@ -249,12 +250,12 @@ BC:</code></pre>
 <label><input type="radio" name="q1" value="2"> <span>Ends the program</span></label>
 <label><input type="radio" name="q1" value="3"> <span>Starts the spindle</span></label>
 <p class="viva-why" hidden>G75 is the home position. The program starts and ends with G75 X0 Z0, so the tool is away from the work.</p></fieldset>
-<fieldset class="viva-q" data-answer="2"><legend><span class="viva-n">2.</span> In <code>G96 S200 LIMS=1500</code>, what does <code>LIMS=1500</code> set?</legend>
-<label><input type="radio" name="q2" value="0"> <span>The feed</span></label>
-<label><input type="radio" name="q2" value="1"> <span>The cutting speed</span></label>
-<label><input type="radio" name="q2" value="2"> <span>The maximum spindle speed – 1500 rpm</span></label>
-<label><input type="radio" name="q2" value="3"> <span>The tool number</span></label>
-<p class="viva-why" hidden>With G96 the rpm keeps rising as the diameter gets smaller; LIMS limits it to 1500 rpm.</p></fieldset>
+<fieldset class="viva-q" data-answer="1"><legend><span class="viva-n">2.</span> What is the full form of CNC?</legend>
+<label><input type="radio" name="q2" value="0"> <span>Central Numerical Control</span></label>
+<label><input type="radio" name="q2" value="1"> <span>Computer Numerical Control</span></label>
+<label><input type="radio" name="q2" value="2"> <span>Computer Network Control</span></label>
+<label><input type="radio" name="q2" value="3"> <span>Coded Numerical Cutting</span></label>
+<p class="viva-why" hidden>CNC stands for Computer Numerical Control: the machine is controlled by a program on a computer.</p></fieldset>
 <fieldset class="viva-q" data-answer="1"><legend><span class="viva-n">3.</span> When taking the tool offset in the X axis, what do you enter?</legend>
 <label><input type="radio" name="q3" value="0"> <span>Zero</span></label>
 <label><input type="radio" name="q3" value="1"> <span>The diameter of the work</span></label>
