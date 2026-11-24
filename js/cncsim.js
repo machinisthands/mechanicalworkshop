@@ -256,7 +256,7 @@
     const midZ = (PART_Z + 2) / 2;
     camera.position.set(midZ + 2, 16 + STOCK_R, 64 + STOCK_R * 3.2);
     const controls = new X.OrbitControls(camera, renderer.domElement);
-    controls.target.set(midZ - 4, 3, 0); controls.enableDamping = true; controls.update();
+    controls.target.set(midZ - 4, 3, 0); controls.enableDamping = true; controls.update(); controls.saveState();
 
     // world: X = machine Z (to the right), Y = radius (up)
     const steel = new T.MeshStandardMaterial({ color: 0xc4c9ce, metalness: 0.9, roughness: 0.32 });
@@ -268,9 +268,14 @@
     const DZ = 0.05, ZTOP = 1, N = Math.round((ZTOP - STOCK_Z_END) / DZ) + 1;
     let mat;
     const zOf = (k) => ZTOP - k * DZ, kOf = (z) => Math.round((ZTOP - z) / DZ);
-    function resetMat() { mat = new Float32Array(N); for (let k = 0; k < N; k++) mat[k] = zOf(k) <= 0.5 ? STOCK_R : 0; }
-    resetMat();
+    // The bar starts short inside the chuck. At the M00 after the stopper it is pulled out against the sleeve,
+    // whose face is 1 mm past Z0 – so the bar face sits at Z+1 and the facing pass takes that 1 mm off.
+    const FACE0 = -20, SLEEVE = 1;
+    let face = FACE0, pulling = false;
+    function fillTo(z) { for (let k = 0; k < N; k++) if (zOf(k) <= z && mat[k] === 0) mat[k] = STOCK_R; dirty = true; }
+    function resetMat() { mat = new Float32Array(N); face = FACE0; pulling = false; fillTo(FACE0); }
     let part = null, dirty = true;
+    resetMat();
     const spin = new T.Group(); scene.add(spin);
     function rebuild() {
       const pts = [new T.Vector2(0, ZTOP)];
@@ -287,7 +292,7 @@
     function makeTool(n) {
       const g = new T.Group(), m = new T.MeshStandardMaterial({ color: toolMats[n] || 0xd9a383, metalness: 0.3, roughness: 0.5 });
       if (n === 3) { const b = new T.Mesh(new T.BoxGeometry(3, 16, 4), m); b.position.set(-1.5, 8, 0); g.add(b); }
-      else if (n === 4) { const c = new T.Mesh(new T.CylinderGeometry(4, 4, 18, 24), m); c.rotation.z = Math.PI / 2; c.position.set(9, 0, 0); g.add(c); }
+      else if (n === 4) { const c = new T.Mesh(new T.CylinderGeometry(4, 4, 18, 24), m); c.rotation.z = Math.PI / 2; c.position.set(SLEEVE + 9, 0, 0); g.add(c); }   // sleeve face 1 mm past its Z0
       else {
         const sh = new T.Shape(); const a = n === 7 ? 0.31 : 0.7;   // insert tip angle (35° / 80°)
         sh.moveTo(0, 0); sh.lineTo(6 * Math.cos(Math.PI / 2 - a / 2 + 0.6), 6); sh.lineTo(7, 9); sh.lineTo(9, 4); sh.lineTo(0, 0);
@@ -311,7 +316,7 @@
       if (tool === 4 || tool === 0) return;
       let a, b;
       if (tool === 3) { a = q.z - 3; b = q.z; }                 // parting blade, 3 mm wide, reference on its right edge
-      else { a = q.z; b = q.z + (tool === 1 ? 0.8 : 0.12); }   // facing tool clears the face; the profile tool cuts at its tip
+      else { a = q.z; b = q.z + (tool === 1 ? 1.5 : 0.12); }   // facing tool clears the face; the profile tool cuts at its tip
       const k0 = Math.max(0, kOf(b)), k1 = Math.min(N - 1, kOf(a));
       for (let k = k0; k <= k1; k++) if (mat[k] > q.r) { mat[k] = Math.max(q.r, 0); dirty = true; }
     }
@@ -338,14 +343,19 @@
       idx = 0; along = 0; playing = false; stepTo = -1; resetMat(); dirty = true;
       pathCut.length = 0; pathRap.length = 0; flushPaths();
       $('.sim-play').textContent = '▶ Play'; $('.sim-play').setAttribute('aria-pressed', 'false'); dro.m.textContent = '';
-      tip = { ...HOME }; curLine = -1; placeTool(MOVES[0] || { tool: 0, speed: '', spindle: '', feed: '' }, tip); showLine(MOVES[0] ? MOVES[0].line : 0, null);
+      tip = { ...HOME }; curLine = -1; spinOn = false; placeTool(MOVES[0] || { tool: 0, speed: '', spindle: '', feed: '' }, tip); showLine(MOVES[0] ? MOVES[0].line : 0, null);
+      if (part) rebuild(); controls.reset();
     }
     function advance(dist) {
       while (dist > 0 && idx < MOVES.length) {
         const m = MOVES[idx];
         showLine(m.line, m.seg); if (m.kind === 'mark') {
           placeTool(m, m.to);
-          if (m.stop === 'M00') { dro.m.textContent = 'M00 – program stop: press Play to go on'; idx++; return 'stop'; }
+          if (m.stop === 'M00') {
+            idx++;
+            if (m.tool === 4 && face < SLEEVE) { pulling = true; dro.m.textContent = 'M00 – open the chuck, pull the bar out against the sleeve (1 mm past Z0) and clamp it'; return 'pull'; }
+            dro.m.textContent = 'M00 – program stop: press Play to go on'; return 'stop';
+          }
           if (m.stop === 'M30') { dro.m.textContent = 'M30 – program end'; idx++; return 'end'; }
           idx++; along = 0; continue;
         }
@@ -369,7 +379,7 @@
       return '';
     }
     function setPlay(on) { playing = on; $('.sim-play').textContent = on ? '❚❚ Pause' : '▶ Play'; $('.sim-play').setAttribute('aria-pressed', String(on)); }
-    $('.sim-play').addEventListener('click', () => { if (idx >= MOVES.length) reset(); setPlay(!playing); if (playing) dro.m.textContent = ''; });
+    $('.sim-play').addEventListener('click', () => { if (pulling) return; if (idx >= MOVES.length) reset(); setPlay(!playing); if (playing) dro.m.textContent = ''; });
     $('.sim-step').addEventListener('click', () => { if (idx >= MOVES.length) reset(); setPlay(false); stepTo = idx; dro.m.textContent = ''; let r = ''; let guard = 0; while (stepTo >= 0 && guard++ < 100000) { r = advance(0.5); if (r) break; } stepTo = -1; if (dirty) rebuild(); });
     $('.sim-reset').addEventListener('click', reset);
     $('.sim-speed select').addEventListener('change', (e) => { speedF = +e.target.value; });
@@ -382,7 +392,11 @@
       const dt = last ? Math.min((now - last) / 1000, 0.05) : 0; last = now;
       if (playing) {
         const r = advance(dt * 12 * speedF);                  // 12 mm/s of feed at 1×, rapids 6× faster
-        if (r === 'stop' || r === 'end') setPlay(false);
+        if (r === 'stop' || r === 'end' || r === 'pull') setPlay(false);
+      }
+      if (pulling) {                                        // the bar slides out of the chuck to the sleeve
+        face = Math.min(SLEEVE, face + dt * 10); fillTo(face);
+        if (face >= SLEEVE) { pulling = false; dro.m.textContent += ' – done. Press Play to go on.'; }
       }
       if (spinOn) spin.rotation.x += dt * 12;
       if (dirty && now - lastBuild > 60) { rebuild(); lastBuild = now; }
