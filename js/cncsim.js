@@ -269,9 +269,9 @@
     const dl = new T.DirectionalLight(0xffffff, 1.4); dl.position.set(20, 40, 30); scene.add(dl);
     const camera = new T.PerspectiveCamera(30, 1, 0.1, 2000);
     const midZ = (PART_Z + 2) / 2;
-    camera.position.set(midZ + 6, 30 + STOCK_R, 104 + STOCK_R * 3.8);
+    camera.position.set(midZ + 4, 12 + STOCK_R, 112 + STOCK_R * 3.8);
     const controls = new X.OrbitControls(camera, renderer.domElement);
-    controls.target.set(midZ + 2, 9, 0); controls.enableDamping = true; controls.update(); controls.saveState();
+    controls.target.set(midZ + 2, 8, 0); controls.enableDamping = true; controls.update(); controls.saveState();
 
     // world: X = machine Z (to the right), Y = radius (up)
     const steel = new T.MeshStandardMaterial({ color: 0xc4c9ce, metalness: 0.9, roughness: 0.32 });
@@ -329,23 +329,26 @@
       const a1 = Math.PI - k, a2 = a1 - c;                         // main and minor edge directions from the tip (Z right, X up)
       const P1 = [L * Math.cos(a1), L * Math.sin(a1)], P3 = [L * Math.cos(a2), L * Math.sin(a2)];
       const sh = new T.Shape(); sh.moveTo(0, 0); sh.lineTo(P1[0], P1[1]); sh.lineTo(P1[0] + P3[0], P1[1] + P3[1]); sh.lineTo(P3[0], P3[1]); sh.lineTo(0, 0);
-      const ins = new T.Mesh(new T.ExtrudeGeometry(sh, { depth: 4.76, bevelEnabled: false }), m); ins.position.z = -2.38;
+      const ins = new T.Mesh(new T.ExtrudeGeometry(sh, { depth: 4.76, bevelEnabled: false }), m); ins.position.z = -4.76;   // top face at centre height
       const cz = (P1[0] + P3[0]) / 2, cx = (P1[1] + P3[1]) / 2;   // insert centre
       return { ins, cz, cx, top: Math.max(P1[1], P3[1], P1[1] + P3[1]) };
     }
     function makeTool(n) {
       const g = new T.Group(), m = new T.MeshStandardMaterial({ color: toolMats[n] || 0xd9a383, metalness: 0.4, roughness: 0.45 });
       if (n === 3) {                                               // 6 mm parting blade, reference on its right edge
-        const ins = new T.Mesh(new T.BoxGeometry(PART_W, 4, 5), m); ins.position.set(-PART_W / 2, 2, 0); g.add(ins);
-        const blade = new T.Mesh(new T.BoxGeometry(PART_W - 0.6, 22, 5), holderM); blade.position.set(-PART_W / 2, 4 + 11, 0); g.add(blade);
-        const shank = new T.Mesh(new T.BoxGeometry(20, 20, 20), holderM); shank.position.set(-PART_W / 2 + 7, 26 + 10, 0); g.add(shank);
+        // insert at the tip, a thin blade (narrower than the insert) going up to a 20 × 20 shank on its right
+        const ins = new T.Mesh(new T.BoxGeometry(PART_W, 5, 6), m); ins.position.set(-PART_W / 2, 2.5, -3); g.add(ins);
+        const blade = new T.Mesh(new T.BoxGeometry(PART_W - 1.2, 26, 20), holderM); blade.position.set(-PART_W / 2, 5 + 13, -10); g.add(blade);
+        const shank = new T.Mesh(new T.BoxGeometry(20, 60, 20), holderM); shank.position.set(-PART_W / 2 + 12.6, 31 + 30, -10); g.add(shank);
       } else if (n === 4) {
         const c = new T.Mesh(new T.CylinderGeometry(5, 5, 24, 32), m); c.rotation.z = Math.PI / 2; c.position.set(SLEEVE + 0.05 + 12, 0, 0); g.add(c);
       } else {
         const r = n === 7 ? rhombicInsert(93, 35, 9.525, m) : rhombicInsert(95, 80, 12.7, m);
         g.add(r.ins);
-        const shank = new T.Mesh(new T.BoxGeometry(20, 30, 20), holderM);   // 20 × 20 shank, square to the axis
-        shank.position.set(r.cz + 6, r.top + 15, 0); g.add(shank);
+        // 20 × 20 shank square to the axis, under the insert (towards the back), functional width 25 mm:
+        // its far side is 25 mm from the tip, so the tip stands 5 mm out from the shank, as on PCLNR / MVJNR 2020 K holders
+        const shank = new T.Mesh(new T.BoxGeometry(20, 70, 20), holderM);
+        shank.position.set(15, 2 + 35, -4.76 - 10); g.add(shank);
       }
       g.visible = false; scene.add(g); return g;
     }
