@@ -238,6 +238,46 @@ BC:</code></pre>
 </div>
 </section>
 <!-- /cnc-notes -->
+<!-- viva -->
+<section class="wrap" aria-labelledby="viva-h">
+<h2 id="viva-h">Viva Questions</h2>
+<p class="notes-lead">Tick one answer for each question, then press Submit.</p>
+<form class="viva" novalidate>
+<fieldset class="viva-q" data-answer="1"><legend><span class="viva-n">1.</span> What does <code>G96</code> do?</legend>
+<label><input type="radio" name="q1" value="0"> <span>Keeps the spindle speed (rpm) constant</span></label>
+<label><input type="radio" name="q1" value="1"> <span>Keeps the cutting speed constant</span></label>
+<label><input type="radio" name="q1" value="2"> <span>Rapid positioning</span></label>
+<label><input type="radio" name="q1" value="3"> <span>Program end</span></label>
+<p class="viva-why" hidden>G96 keeps the cutting (surface) speed constant, so the rpm rises as the diameter gets smaller.</p></fieldset>
+<fieldset class="viva-q" data-answer="2"><legend><span class="viva-n">2.</span> In <code>G96 S200 LIMS=1500</code>, what does <code>LIMS=1500</code> set?</legend>
+<label><input type="radio" name="q2" value="0"> <span>The feed</span></label>
+<label><input type="radio" name="q2" value="1"> <span>The cutting speed</span></label>
+<label><input type="radio" name="q2" value="2"> <span>The maximum spindle speed – 1500 rpm</span></label>
+<label><input type="radio" name="q2" value="3"> <span>The tool number</span></label>
+<p class="viva-why" hidden>With G96 the rpm keeps rising as the diameter gets smaller; LIMS limits it to 1500 rpm.</p></fieldset>
+<fieldset class="viva-q" data-answer="1"><legend><span class="viva-n">3.</span> Which code keeps the spindle speed (rpm) constant, as used for facing and parting?</legend>
+<label><input type="radio" name="q3" value="0"> <span>G96</span></label>
+<label><input type="radio" name="q3" value="1"> <span>G97</span></label>
+<label><input type="radio" name="q3" value="2"> <span>G75</span></label>
+<label><input type="radio" name="q3" value="3"> <span>G01</span></label>
+<p class="viva-why" hidden>G97 means constant rpm – for example G97 S1500 M03 for facing.</p></fieldset>
+<fieldset class="viva-q" data-answer="0"><legend><span class="viva-n">4.</span> What does <code>CYCLE95</code> do?</legend>
+<label><input type="radio" name="q4" value="0"> <span>Stock removal (roughing) along the contour</span></label>
+<label><input type="radio" name="q4" value="1"> <span>Thread cutting</span></label>
+<label><input type="radio" name="q4" value="2"> <span>Drilling</span></label>
+<label><input type="radio" name="q4" value="3"> <span>Returns to the home position</span></label>
+<p class="viva-why" hidden>CYCLE95 removes the stock along the contour given between the labels AB and BC.</p></fieldset>
+<fieldset class="viva-q" data-answer="1"><legend><span class="viva-n">5.</span> During simulation and the first run, why do we keep a hand on Reset?</legend>
+<label><input type="radio" name="q5" value="0"> <span>To change the tool</span></label>
+<label><input type="radio" name="q5" value="1"> <span>To stop the machine at once if it moves wrongly</span></label>
+<label><input type="radio" name="q5" value="2"> <span>To start the coolant</span></label>
+<label><input type="radio" name="q5" value="3"> <span>To save the program</span></label>
+<p class="viva-why" hidden>If the machine moves in a way that is not in the program, pressing Reset stops it at once.</p></fieldset>
+<p class="viva-score" role="status" hidden></p>
+<div class="viva-bar"><button type="submit" class="viva-submit">Submit</button><button type="button" class="viva-again" hidden>Try again</button></div>
+</form>
+</section>
+<!-- /viva -->
 <section class="wrap" aria-labelledby="res-h">
 <h2 id="res-h">Resources</h2>
 <ul class="resources">
@@ -258,6 +298,7 @@ BC:</code></pre>
 <script src="../../js/engage.js" defer></script>
 <script src="../../js/comments.js" defer></script>
 <!-- /engage-js -->
+<script src="../../js/viva.js" defer></script>
 <script src="../../js/app.js"></script>
 </body>
 </html>

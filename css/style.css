@@ -443,3 +443,29 @@ html.sheet-open { overflow: hidden; }
 .part-svg .dims.mill .dim { marker-start: url(#arm); marker-end: url(#arm); }
 .part-svg .dims .lead { stroke: var(--copper-light); stroke-width: 1; }
 .codes code { white-space: nowrap; }
+/* ==== Viva questions ==== */
+.viva { display: grid; gap: 12px; }
+.viva-q { margin: 0; padding: 12px 16px 14px; background: var(--surface); border: 1px solid var(--line); border-radius: var(--radius); }
+.viva-q legend { float: left; width: 100%; padding: 0; margin-bottom: 8px; color: var(--heading); font-weight: 600; line-height: 1.45; }
+.viva-q legend + * { clear: both; }
+.viva-n { color: var(--copper-light); }
+.viva-q code { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: .9em; }
+.viva-q label { display: flex; align-items: flex-start; gap: 10px; padding: 8px 10px; margin-top: 6px; border: 1px solid var(--line); border-radius: 8px; cursor: pointer; line-height: 1.4; }
+.viva-q label:hover { border-color: var(--line-strong); }
+.viva-q input { accent-color: var(--copper); width: 18px; height: 18px; margin: 1px 0 0; flex: none; }
+.viva-q label:has(input:checked) { border-color: var(--copper); background: var(--copper-tint); }
+.viva-q.is-right { border-left: 4px solid #3FB950; }
+.viva-q.is-wrong { border-left: 4px solid #E5484D; }
+.viva-q label.viva-correct, .viva-q label.viva-correct:has(input:checked) { border-color: #3FB950; background: rgba(63, 185, 80, .12); }
+.viva-q label.viva-correct::after { content: "✓"; margin-left: auto; color: #3FB950; font-weight: 700; }
+.viva-q label.viva-picked-wrong, .viva-q label.viva-picked-wrong:has(input:checked) { border-color: #E5484D; background: rgba(229, 72, 77, .12); }
+.viva-q label.viva-picked-wrong::after { content: "✗"; margin-left: auto; color: #E5484D; font-weight: 700; }
+.viva-why { margin: 10px 0 0; font-size: .9rem; color: var(--muted); }
+.viva-bar { display: flex; gap: 10px; }
+.viva-submit, .viva-again { min-height: 44px; padding: 0 22px; border-radius: 999px; font: inherit; font-weight: 600; cursor: pointer; }
+.viva-submit { border: 0; background: var(--copper); color: var(--on-copper); }
+.viva-again { border: 1px solid var(--copper); background: none; color: var(--copper-light); }
+.viva-score { margin: 0; padding: 12px 16px; border-radius: var(--radius); background: var(--copper-tint); border: 1px solid var(--copper); color: var(--heading); font-size: 1.05rem; }
+.viva-score b { font-size: 1.25rem; color: var(--copper-light); }
+.viva-score.viva-warn { background: rgba(229, 72, 77, .1); border-color: #E5484D; }
+@media print { .viva-bar { display: none; } }
