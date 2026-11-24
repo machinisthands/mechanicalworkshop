@@ -330,8 +330,7 @@
       const P1 = [L * Math.cos(a1), L * Math.sin(a1)], P3 = [L * Math.cos(a2), L * Math.sin(a2)];
       const sh = new T.Shape(); sh.moveTo(0, 0); sh.lineTo(P1[0], P1[1]); sh.lineTo(P1[0] + P3[0], P1[1] + P3[1]); sh.lineTo(P3[0], P3[1]); sh.lineTo(0, 0);
       const ins = new T.Mesh(new T.ExtrudeGeometry(sh, { depth: 4.76, bevelEnabled: false }), m); ins.position.z = -4.76;   // top face at centre height
-      const cz = (P1[0] + P3[0]) / 2, cx = (P1[1] + P3[1]) / 2;   // insert centre
-      return { ins, cz, cx, top: Math.max(P1[1], P3[1], P1[1] + P3[1]) };
+      return { ins, P1, P3 };
     }
     function makeTool(n) {
       const g = new T.Group(), m = new T.MeshStandardMaterial({ color: toolMats[n] || 0xd9a383, metalness: 0.4, roughness: 0.45 });
@@ -345,10 +344,16 @@
       } else {
         const r = n === 7 ? rhombicInsert(93, 35, 9.525, m) : rhombicInsert(95, 80, 12.7, m);
         g.add(r.ins);
-        // 20 × 20 shank square to the axis, under the insert (towards the back), functional width 25 mm:
-        // its far side is 25 mm from the tip, so the tip stands 5 mm out from the shank, as on PCLNR / MVJNR 2020 K holders
-        const shank = new T.Mesh(new T.BoxGeometry(20, 70, 20), holderM);
-        shank.position.set(15, 2 + 35, -4.76 - 10); g.add(shank);
+        // The holder head follows the insert: its sides run along the insert's edges, so on the narrow 35° VNMG
+        // the head stays clear of the work in profiling. The 20 × 20 shank starts only after the head length
+        // (LH ≈ 32 mm MVJNR, 28 mm PCLNR). Functional width 25 mm: the shank's far side is 25 mm from the tip.
+        const LH = n === 7 ? 32 : 28, WF = 25, [p1, p3] = [r.P1, r.P3];
+        const hs = new T.Shape();
+        hs.moveTo(0.4, 0.4); hs.lineTo(p1[0], p1[1]); hs.lineTo(p1[0], LH); hs.lineTo(WF, LH); hs.lineTo(WF, p3[1]); hs.lineTo(p3[0], p3[1]); hs.lineTo(0.4, 0.4);
+        const head = new T.Mesh(new T.ExtrudeGeometry(hs, { depth: 20, bevelEnabled: false }), holderM);
+        head.position.z = -4.76 - 20; g.add(head);
+        const shank = new T.Mesh(new T.BoxGeometry(20, 60, 20), holderM);
+        shank.position.set(WF - 10, LH + 30, -4.76 - 10); g.add(shank);
       }
       g.visible = false; scene.add(g); return g;
     }
