@@ -508,8 +508,5 @@ html.sheet-open { overflow: hidden; }
 .sim-svg .hit { fill: none; stroke: transparent; stroke-width: calc(var(--sw) * 8); cursor: pointer; }
 .sim-prof figcaption { margin-top: 6px; font-size: .8rem; color: var(--muted); }
 @media print { .sim { display: none; } .sim + pre, pre.program[hidden] { display: block !important; } }
-/* ==== Front page: what is inside a card ==== */
-.card-desc { margin: 0; padding: 0 14px 8px; font-size: .88rem; line-height: 1.45; color: var(--text); }
-.card-tags { display: flex; flex-wrap: wrap; gap: 5px; margin: 0; padding: 0 14px 14px; list-style: none; }
-.card-tags li { padding: 2px 8px; border: 1px solid var(--line); border-radius: 999px; background: var(--copper-tint); color: var(--copper-light); font-size: .74rem; font-weight: 600; line-height: 1.6; white-space: nowrap; }
-@media (max-width: 600px) { .card-desc { padding: 0 10px 6px; font-size: .8rem; } .card-tags { padding: 0 10px 10px; gap: 4px; } .card-tags li { font-size: .68rem; padding: 1px 6px; } }
+/* ==== Front page: notes under the group headings ==== */
+.group-note { max-width: 760px; margin: -4px 0 14px; color: var(--text); font-size: .95rem; line-height: 1.55; }
