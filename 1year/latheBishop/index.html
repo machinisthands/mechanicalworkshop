@@ -61,7 +61,7 @@
 <header class="wrap">
 <h1>CNC Lathe Bishop</h1>
 <p class="badge">1st Year</p>
-<div class="intro"><p>A CNC turning workshop project demonstrating engineering drawing, 3D modelling, machining operations and CNC programming.</p><p>Study the drawing first, explore the interactive 3D model, understand the machining operations, examine the CNC program and watch the machining demonstration.</p></div>
+<div class="intro"><p>A CNC turning workshop job: an interactive 3D model, the engineering drawing, the machining operations, the G and M codes, the CNC program and how to run it on the machine.</p><p>Turn the 3D model to see the part from every side, then study the engineering drawing. Follow the machining operations, learn the G and M codes, and read the CNC program. Finally, see how to run the program on the machine and watch the machining video.</p></div>
 </header>
 <section class="wrap" aria-labelledby="model-h">
 <div class="viewer-head">
@@ -132,6 +132,20 @@
 </ol>
 </section>
 <aside class="ad wrap" data-ad="article" aria-label="Advertisement"><p class="ad-label">Advertisement</p></aside>
+<!-- cnc-codes -->
+<section class="wrap notes" aria-labelledby="codes-h">
+<h2 id="codes-h">G &amp; M Codes</h2>
+<p class="notes-lead">The codes used in the CNC program below.</p>
+<h3>Preparatory functions (G codes)</h3>
+<dl class="codes"><dt>G00</dt><dd>Rapid positioning<br><code>G00 X10 Y10</code> · <code>G00 Z10</code></dd><dt>G01</dt><dd>Linear interpolation<br><code>G01 X10 Y10 F100</code></dd><dt>G02</dt><dd>Circular interpolation, clockwise (CW)<br><code>G01 X0 Y0</code> → <code>G02 X10 Y0 R5</code></dd><dt>G03</dt><dd>Circular interpolation, counter-clockwise (CCW)<br><code>G01 X0 Y0</code> → <code>G03 X10 Y0 R5</code></dd><dt>G70</dt><dd>Dimensions in inch</dd><dt>G71</dt><dd>Dimensions in mm</dd><dt>G75</dt><dd>Home position</dd></dl>
+
+<h3>Miscellaneous functions (M codes)</h3>
+<dl class="codes"><dt>M03</dt><dd>Spindle clockwise (CW)</dd><dt>M04</dt><dd>Spindle counter-clockwise (CCW)</dd><dt>M05</dt><dd>Spindle stop</dd><dt>M06</dt><dd>Tool change (<code>T1 M06</code>)</dd><dt>M08</dt><dd>Coolant ON</dd><dt>M09</dt><dd>Coolant OFF</dd><dt>M30</dt><dd>Program end and reset</dd></dl>
+
+<h3>Other words</h3>
+<dl class="codes"><dt>T</dt><dd>Tool selection</dd><dt>S</dt><dd>Spindle speed in rpm</dd><dt>F</dt><dd>Feed in mm/rev</dd><dt>CR</dt><dd>Radius of circle</dd><dt>D</dt><dd>Offset number</dd><dt>CYCLE95</dt><dd>Stock removal (roughing) cycle</dd></dl>
+</section>
+<!-- /cnc-codes -->
 <section class="wrap" aria-labelledby="program-h">
 <h2 id="program-h">CNC Turning Program</h2>
 <p>The CNC program contains the tool movements, cutting operations and machining instructions required to manufacture the Lathe Bishop.</p>
@@ -210,11 +224,10 @@ BC:</code></pre>
 </section>
 <!-- cnc-notes -->
 <section class="wrap notes" aria-labelledby="notes-h">
-<h2 id="notes-h">Operating Notes &amp; Programming</h2>
+<h2 id="notes-h">Operating the Machine</h2>
 <p class="notes-lead">CNC – <b>Computer Numerical Control</b>. Working on the CNC lathe has four stages:</p>
 <ol class="stages"><li>Machine instruction</li><li>Tooling</li><li>Program entry</li><li>Manufacturing</li></ol>
-
-<h3>Operating the machine</h3>
+<h3>Step by step</h3>
 <div class="step-grid">
 <div class="step-card"><h4>Machine ON</h4><ol><li>Main panel ON</li><li>Stabilizer ON</li><li>Press the Start button</li><li>Machine main power ON</li></ol></div>
 <div class="step-card"><h4>Running setup</h4><ol><li>Emergency ON (release the emergency button)</li><li>Press Reset</li></ol></div>
@@ -224,16 +237,6 @@ BC:</code></pre>
 <div class="step-card"><h4>Simulation</h4><ol><li>MEM</li><li>Close the door</li><li>Simulation</li><li>Keep a hand on Reset and press Cycle Start</li></ol><p class="note-warn">⚠ Important: if the machine moves, press Reset.</p></div>
 <div class="step-card"><h4>Running the program</h4><ol><li>MEM</li><li>Close the door</li><li>Single block</li><li>Keep a hand on Reset and press Cycle Start</li></ol><p class="note-warn">⚠ Important: if there is any movement that is not in the program, press Reset.</p></div>
 </div>
-
-<h3>Preparatory functions (G codes)</h3>
-<dl class="codes"><dt>G00</dt><dd>Rapid positioning<br><code>G00 X10 Y10</code> · <code>G00 Z10</code></dd><dt>G01</dt><dd>Linear interpolation<br><code>G01 X10 Y10 F100</code></dd><dt>G02</dt><dd>Circular interpolation, clockwise (CW)<br><code>G01 X0 Y0</code> → <code>G02 X10 Y0 R5</code></dd><dt>G03</dt><dd>Circular interpolation, counter-clockwise (CCW)<br><code>G01 X0 Y0</code> → <code>G03 X10 Y0 R5</code></dd><dt>G70</dt><dd>Dimensions in inch</dd><dt>G71</dt><dd>Dimensions in mm</dd><dt>G75</dt><dd>Home position</dd></dl>
-
-<h3>Miscellaneous functions (M codes)</h3>
-<dl class="codes"><dt>M03</dt><dd>Spindle clockwise (CW)</dd><dt>M04</dt><dd>Spindle counter-clockwise (CCW)</dd><dt>M05</dt><dd>Spindle stop</dd><dt>M06</dt><dd>Tool change (<code>T1 M06</code>)</dd><dt>M08</dt><dd>Coolant ON</dd><dt>M09</dt><dd>Coolant OFF</dd><dt>M30</dt><dd>Program end and reset</dd></dl>
-
-<h3>Other words</h3>
-<dl class="codes"><dt>T</dt><dd>Tool selection</dd><dt>S</dt><dd>Spindle speed in rpm</dd><dt>F</dt><dd>Feed in mm/rev</dd><dt>CR</dt><dd>Radius of circle</dd><dt>D</dt><dd>Offset number</dd><dt>CYCLE95</dt><dd>Stock removal (roughing) cycle</dd></dl>
-
 </section>
 <!-- /cnc-notes -->
 <section class="wrap" aria-labelledby="res-h">
