@@ -264,18 +264,18 @@ BC:</code></pre>
 <label><input type="radio" name="q3" value="2"> <span>Coolant OFF</span></label>
 <label><input type="radio" name="q3" value="3"> <span>Program stop</span></label>
 <p class="viva-why" hidden>M08 switches the coolant on; M09 switches it off.</p></fieldset>
-<fieldset class="viva-q" data-answer="1"><legend><span class="viva-n">4.</span> In <code>T7 D1</code>, what does <code>D1</code> mean?</legend>
-<label><input type="radio" name="q4" value="0"> <span>Depth of cut 1 mm</span></label>
-<label><input type="radio" name="q4" value="1"> <span>Tool offset (offset page) number 1</span></label>
-<label><input type="radio" name="q4" value="2"> <span>Diameter 1 mm</span></label>
-<label><input type="radio" name="q4" value="3"> <span>Dwell for 1 second</span></label>
-<p class="viva-why" hidden>T selects the tool and D the offset page with its tool offset values – here tool 7 with offset 1.</p></fieldset>
-<fieldset class="viva-q" data-answer="1"><legend><span class="viva-n">5.</span> During simulation and the first run, why do we keep a hand on Reset?</legend>
-<label><input type="radio" name="q5" value="0"> <span>To change the tool</span></label>
-<label><input type="radio" name="q5" value="1"> <span>To stop the machine at once if it moves wrongly</span></label>
-<label><input type="radio" name="q5" value="2"> <span>To start the coolant</span></label>
-<label><input type="radio" name="q5" value="3"> <span>To save the program</span></label>
-<p class="viva-why" hidden>If the machine moves in a way that is not in the program, pressing Reset stops it at once.</p></fieldset>
+<fieldset class="viva-q" data-answer="1"><legend><span class="viva-n">4.</span> On a CNC lathe, what does the X axis denote?</legend>
+<label><input type="radio" name="q4" value="0"> <span>The length of the work</span></label>
+<label><input type="radio" name="q4" value="1"> <span>The diameter of the work</span></label>
+<label><input type="radio" name="q4" value="2"> <span>The depth of the tool</span></label>
+<label><input type="radio" name="q4" value="3"> <span>The spindle speed</span></label>
+<p class="viva-why" hidden>On a lathe X is the diameter and Z is the length along the work. That is why X values in the program, like X20, are diameters.</p></fieldset>
+<fieldset class="viva-q" data-answer="0"><legend><span class="viva-n">5.</span> What does <code>CYCLE95</code> do?</legend>
+<label><input type="radio" name="q5" value="0"> <span>Stock removal cycle</span></label>
+<label><input type="radio" name="q5" value="1"> <span>Drilling cycle</span></label>
+<label><input type="radio" name="q5" value="2"> <span>Tapping cycle</span></label>
+<label><input type="radio" name="q5" value="3"> <span>Thread cutting cycle</span></label>
+<p class="viva-why" hidden>CYCLE95 removes the stock along the contour between the labels AB and BC. The machining type decides the work: 1 = roughing, 5 = finishing, 9 = roughing and finishing. This program uses 9.</p></fieldset>
 <p class="viva-score" role="status" hidden></p>
 <div class="viva-bar"><button type="submit" class="viva-submit">Submit</button><button type="button" class="viva-again" hidden>Try again</button></div>
 </form>
