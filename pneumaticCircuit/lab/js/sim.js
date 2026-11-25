@@ -27,6 +27,7 @@ export class Sim {
     this.svOpen = false;
     this.lever = 0;            // 0: 1→2, 4→5   1: 1→4, 2→3
     this.silencer = { 3: true, 5: true };
+    this.cylType = 'double';   // 'double' or 'single' (spring return, rear port only)
     this.cylPos = 0;           // 0 = പിന്നിൽ, 1 = മുന്നിൽ
     this.cylVel = 0;
     this.speed = 10;           // fixed time speed (10×)
@@ -59,8 +60,9 @@ export class Sim {
       else if (a.port || b.port) vents.push({ node: (a.port || b.port).id, type: 'free', tube: t, size: t.size });
     }
     for (const p of ports) {
+      if (!p.enabled) continue;
       if (p.selfSealing) { if (p.tube) uf.union(p.id, 'MAN'); }
-      else if (!p.tube) vents.push({ node: p.id, type: 'open', port: p, size: p.size });
+      else if (!p.tube && !p.plugged) vents.push({ node: p.id, type: 'open', port: p, size: p.size });
     }
     if (this.svOpen) uf.union('S.in', 'MAN');
     else vents.push({ node: 'MAN', type: 'exhaust', where: 'slide', size: 10 });
@@ -68,7 +70,9 @@ export class Sim {
     if (this.lever === 0) { uf.union('V.1', 'V.2'); vents.push({ node: 'V.4', type: 'exhaust', where: 5, size: 4 }); }
     else { uf.union('V.1', 'V.4'); vents.push({ node: 'V.2', type: 'exhaust', where: 3, size: 4 }); }
     uf.union('Y.A', 'CAP');
-    uf.union('Y.B', 'ROD');
+    // Single acting: the rod side only breathes to the atmosphere (no port B)
+    if (this.cylType === 'single') vents.push({ node: 'ROD', type: 'breather', size: 4 });
+    else uf.union('Y.B', 'ROD');
 
     // പ്രഷർ ഉറവിടങ്ങൾ
     const gP = new Map();
@@ -133,6 +137,7 @@ export class Sim {
         if (fed) { leak += P * 0.03; this.exhaustFlows.push(v); }
         continue;
       }
+      if (v.type === 'breather') continue;
       if (fed) leak += P * OPEN_LEAK[v.size];
       if (v.type === 'open') this.leaks.push(v);
     }
@@ -147,7 +152,9 @@ export class Sim {
 
     // Cylinder
     const Pa = this.p('CAP'), Pb = this.p('ROD');
-    const F = Pa * 1.0 - Pb * 0.86;
+    // Single acting: the spring pushes the piston back when the air is let out
+    const SPRING = 1.4;
+    const F = this.cylType === 'single' ? Pa - SPRING : Pa * 1.0 - Pb * 0.86;
     let v = 0;
     // Speed follows the pressure: ~4 bar fast, ~3 bar good, low pressure slow
     if (Math.abs(F) > 0.3) v = Math.sign(F) * Math.min(2.2, 0.5 * (Math.abs(F) - 0.3));

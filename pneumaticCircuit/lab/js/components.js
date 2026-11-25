@@ -12,7 +12,8 @@ export function buildBench(scene) {
   for (const [x, z] of [[-98, -18], [102, -18], [-98, 36], [102, 36]]) {
     g.add(box(4, 72, 4, M.aluDark, x, -39, z));
   }
-  const floor = new THREE.Mesh(new THREE.PlaneGeometry(800, 800), M.floor);
+  // Invisible floor that only shows the shadow (like the other 3D models)
+  const floor = new THREE.Mesh(new THREE.PlaneGeometry(800, 800), new THREE.ShadowMaterial({ opacity: 0.35 }));
   floor.rotation.x = -Math.PI / 2;
   floor.position.y = -75;
   floor.receiveShadow = true;
@@ -33,75 +34,159 @@ export function buildBench(scene) {
   return g;
 }
 
-// ---------- Compressor ----------
+// ---------- Compressor (Janatics silent compressor) ----------
+// Spec plate drawn on a canvas, wrapped round the front of the motor
+function specLabel() {
+  const c = document.createElement('canvas');
+  c.width = 512; c.height = 160;
+  const x = c.getContext('2d');
+  x.fillStyle = '#0d0d0f'; x.fillRect(0, 0, 512, 160);
+  x.strokeStyle = '#e8e8e8'; x.lineWidth = 2;
+  x.strokeRect(4, 4, 504, 152);
+  x.beginPath(); x.moveTo(300, 4); x.lineTo(300, 156);
+  for (const y of [44, 84, 120]) { x.moveTo(4, y); x.lineTo(300, y); }
+  x.moveTo(44, 4); x.lineTo(44, 156); x.stroke();
+  x.fillStyle = '#f2f2f2'; x.textAlign = 'center'; x.textBaseline = 'middle';
+  x.font = '600 20px Inter, Arial, sans-serif';
+  [['230 V~ AC - 50 Hz', 24], ['0.34 KW - 2.4 A - 2900 rpm', 64], ['50 l/min', 102], ['32 l/min', 138]].forEach(([t, y]) => x.fillText(t, 172, y));
+  x.font = '600 14px Inter, Arial, sans-serif';
+  [['1ph', 24], ['M', 64], ['0 bar', 102], ['8 bar', 138]].forEach(([t, y]) => x.fillText(t, 24, y));
+  x.font = '600 17px Inter, Arial, sans-serif';
+  x.fillText('Max working time', 405, 28);
+  x.fillText('15 min on / 15 min off', 405, 64);
+  x.font = '500 14px Inter, Arial, sans-serif';
+  x.fillText('Protect compressor against', 405, 104);
+  x.fillText('rain and moisture', 405, 124);
+  const t = new THREE.CanvasTexture(c);
+  t.colorSpace = THREE.SRGBColorSpace;
+  t.anisotropy = 4;
+  return t;
+}
+function brandLabel() {
+  const c = document.createElement('canvas');
+  c.width = 256; c.height = 64;
+  const x = c.getContext('2d');
+  x.fillStyle = '#16181b'; x.fillRect(0, 0, 256, 64);
+  x.fillStyle = '#1e88e5'; x.font = '800 40px Arial, sans-serif';
+  x.textAlign = 'center'; x.textBaseline = 'middle';
+  x.fillText('JANATICS', 128, 34);
+  const t = new THREE.CanvasTexture(c);
+  t.colorSpace = THREE.SRGBColorSpace;
+  return t;
+}
+
 export function buildCompressor() {
   const g = new THREE.Group();
-  g.position.set(-64, 0, 12);
+  g.position.set(-62, 0, 12);
   const comp = { key: 'compressor', group: g, ports: [] };
   pickable(g, { kind: 'comp', key: 'compressor' });
 
-  // ടാങ്ക്
-  const tankY = 14, tankR = 11, tankL = 32;
-  g.add(cylX(tankR, tankL, M.tank, 0, tankY, 0, 48));
-  for (const s of [-1, 1]) {
-    const cap = mesh(new THREE.SphereGeometry(tankR, 40, 20, 0, Math.PI * 2, 0, Math.PI / 2), M.tank, s * tankL / 2, tankY, 0);
-    cap.scale.y = 0.45;
-    cap.rotation.z = -s * Math.PI / 2;
-    g.add(cap);
-    g.add(cylX(tankR + 0.15, 0.6, M.aluDark, s * (tankL / 2 - 0.3), tankY, 0, 48));
-  }
-  // കാലുകളും ചക്രങ്ങളും
-  g.add(box(3, 4, 14, M.rubber, 12, 2, 0));
-  for (const z of [-8, 8]) {
-    const w = cylZ(3, 1.6, M.rubber, -12, 3, z, 24);
-    g.add(w);
-    g.add(cylZ(1.2, 1.8, M.aluDark, -12, 3, z, 16));
-  }
-  g.add(box(26, 1, 14, M.aluDark, 0, 25.4, 0));
+  const tankMat = new THREE.MeshStandardMaterial({ color: 0x24272b, metalness: 0.3, roughness: 0.6 });
+  const chrome = new THREE.MeshStandardMaterial({ color: 0xeef1f4, metalness: 1, roughness: 0.12 });
+  const motorMat = new THREE.MeshStandardMaterial({ color: 0x141517, metalness: 0.2, roughness: 0.5 });
 
-  // മോട്ടോറും പമ്പും
-  const pump = new THREE.Group();
-  pump.add(cylZ(5.2, 13, M.motor, -4, 31.2, 0, 32));
-  pump.add(cylZ(5.4, 1, M.black, -4, 31.2, 6.8, 32));
-  pump.add(cylZ(5.4, 1, M.black, -4, 31.2, -6.8, 32));
-  for (const z of [-3.6, 3.6]) {
-    const head = cyl(2.5, 6, M.alu, 5.5, 30, z, 24);
-    pump.add(head);
-    for (let i = 0; i < 4; i++) pump.add(cyl(3.1, 0.35, M.alu, 5.5, 28 + i * 1.3, z, 24));
-    pump.add(box(5.6, 1.6, 5.6, M.black, 5.5, 33.8, z));
+  // Flat round tank (pancake), standing on its base
+  const TR = 17, TB = 2.2, TT = 15;
+  const prof = [[0, TB], [TR - 2.5, TB], [TR - 0.6, TB + 0.8], [TR, TB + 2.4], [TR, TT - 2.4], [TR - 0.6, TT - 0.8], [TR - 2.5, TT], [0, TT]]
+    .map(([r, y]) => new THREE.Vector2(r, y));
+  g.add(mesh(new THREE.LatheGeometry(prof, 64), tankMat));
+  g.add(cyl(TR + 0.12, 0.5, tankMat, 0, (TB + TT) / 2, 0, 64)); // weld seam
+  // Brand plate on the front of the tank
+  const brand = new THREE.Mesh(new THREE.PlaneGeometry(9, 2.2), new THREE.MeshStandardMaterial({ map: brandLabel(), roughness: 0.6 }));
+  brand.position.set(0, TT - 3.6, TR + 0.08);
+  brand.rotation.x = -0.12;
+  g.add(brand);
+  // Tank drain
+  g.add(cyl(0.45, 1.4, M.brass, 3, TT + 0.6, 9, 12));
+  g.add(box(1.6, 0.35, 0.35, M.brass, 3, TT + 1.2, 9));
+
+  // Chrome carry frame: two posts in black sleeves with rubber feet, bar over the top
+  const PX = 18.6, PZ = 4.5, TOP = 43;
+  for (const s of [-1, 1]) {
+    g.add(cyl(1.35, 2.2, M.rubber, s * PX, 1.1, PZ, 20));
+    g.add(cyl(1.05, 13, M.black, s * PX, 8.6, PZ, 20));
   }
+  const fp = [[-PX, 14, PZ], [-PX, TOP - 5, PZ], [-PX + 2, TOP - 1, PZ - 1], [-PX + 5, TOP, PZ - 2],
+    [PX - 5, TOP, PZ - 2], [PX - 2, TOP - 1, PZ - 1], [PX, TOP - 5, PZ], [PX, 14, PZ]].map((p) => new THREE.Vector3(...p));
+  g.add(mesh(new THREE.TubeGeometry(new THREE.CatmullRomCurve3(fp, false, 'centripetal'), 90, 0.85, 14, false), chrome));
+
+  // Motor and pump on top of the tank (vibrates while running)
+  const pump = new THREE.Group();
+  pump.add(box(17, 1.4, 13, M.black, 1, TT + 0.7, 0));
+  pump.add(cyl(8, 9, motorMat, 0, TT + 6, 0, 48));
+  // Spec plate on the front of the motor
+  const lab = new THREE.Mesh(new THREE.CylinderGeometry(8.04, 8.04, 4.6, 40, 1, true, -0.95, 1.9),
+    new THREE.MeshStandardMaterial({ map: specLabel(), roughness: 0.5 }));
+  lab.position.set(0, TT + 6.4, 0);
+  pump.add(lab);
+  // Ribbed cooling cover
+  const coverY = TT + 10.5;
+  pump.add(cyl(9.2, 5, motorMat, 0, coverY + 2.5, 0, 48));
+  const dome = mesh(new THREE.SphereGeometry(9.2, 48, 16, 0, Math.PI * 2, 0, Math.PI / 2), motorMat, 0, coverY + 5, 0);
+  dome.scale.y = 0.22;
+  pump.add(dome);
+  for (let i = 0; i < 32; i++) {
+    const a = (i / 32) * Math.PI * 2;
+    const f = box(0.7, 5.6, 0.9, motorMat, Math.sin(a) * 9.4, coverY + 2.7, Math.cos(a) * 9.4);
+    f.rotation.y = a;
+    pump.add(f);
+  }
+  pump.add(cyl(0.9, 0.9, M.aluDark, 0, coverY + 7.4, 0, 6)); // top bolt
+  // Oil filler plug and sight glass at the front of the pump base
+  const oil = cylZ(1.1, 0.5, M.black, -2.4, TT + 2.6, 7.9, 24);
+  pump.add(oil);
+  pump.add(cylZ(1.1, 0.6, M.aluDark, 1.6, TT + 2.6, 7.9, 6));
+  pump.add(cylZ(0.6, 0.3, new THREE.MeshStandardMaterial({ color: 0x8a4a1a, roughness: 0.3 }), 1.6, TT + 2.6, 8.3, 16));
+  // Intake filter pointing up-right at the back
+  const intake = cyl(0.9, 3, M.black, 8.4, TT + 12.5, -3, 16);
+  intake.rotation.z = -0.8;
+  pump.add(intake);
   g.add(pump);
   comp.pump = pump;
 
-  // പിടി
-  for (const z of [-5, 5]) g.add(cyl(0.6, 10, M.black, -16, 31, z, 12));
-  g.add(cylZ(0.8, 12, M.black, -16, 36, 0, 16));
-
-  // Pressure switch box
+  // Pressure switch box on the right side
   const sw = new THREE.Group();
-  sw.position.set(12, 30.5, 4);
-  sw.add(roundBox(6.4, 7, 5, 0.6, M.black));
+  sw.position.set(11.6, TT + 7, 2.5);
+  sw.add(roundBox(5, 6.4, 6, 0.5, M.black));
+  sw.add(box(2.2, 0.8, 1.6, M.black, -0.6, 3.6, -1));
   g.add(sw);
-  // മോട്ടോർ ലാമ്പ്
+  // Motor lamp on the switch box
   const lampMat = new THREE.MeshStandardMaterial({ color: 0x1b5e20, emissive: 0x000000 });
-  const lamp = mesh(new THREE.SphereGeometry(0.45, 16, 12), lampMat, 14.4, 33.2, 6.55);
+  const lamp = mesh(new THREE.SphereGeometry(0.45, 16, 12), lampMat, 11.6, TT + 8.6, 5.55);
   g.add(lamp);
   comp.lamp = lamp;
-  // ടാങ്ക് ഗേജ്
-  const gauge = createGauge({ radius: 2.5, max: 12, step: 2, psiStep: 50 });
-  gauge.group.position.set(11.4, 30, 6.7);
+  // Safety valve below the switch box
+  g.add(cylZ(0.5, 3, M.brass, 12.5, TT + 1.3, 3.5, 12));
+  g.add(cylZ(1.3, 0.8, M.black, 12.5, TT + 1.3, 5.2, 24));
+
+  // Air outlet line on the left: tank → ball valve → filter-regulator
+  const VY = TT + 6.4, VZ = 8.6;
+  g.add(cyl(0.7, 5.6, M.alu, -8.4, TT + 2.8, VZ - 1, 6)); // riser from tank (hex fitting)
+  g.add(box(2, 2, 2, M.alu, -8.4, VY, VZ - 1));
+  g.add(cylX(0.75, 4.4, M.alu, -11.6, VY, VZ - 1, 16)); // ball valve body
+  const handle = box(3.4, 0.5, 0.9, M.red, -11.6, VY + 1.1, VZ - 1);
+  handle.rotation.z = 0.15;
+  g.add(handle);
+  g.add(cylX(0.55, 1.6, M.brass, -14.4, VY, VZ - 1, 12));
+  // Filter-regulator: knob, body, bowl
+  const FX = -16;
+  g.add(box(2.6, 3, 2.6, M.black, FX, VY, VZ - 1));
+  g.add(cyl(1.25, 2.6, M.black, FX, VY + 2.8, VZ - 1, 20));
+  g.add(cyl(1.1, 6, M.black, FX, VY - 4.4, VZ - 1, 20));
+  g.add(cyl(0.3, 1.2, M.black, FX, VY - 8, VZ - 1, 8));
+  // Tank pressure gauge on a bracket in front
+  g.add(box(1.2, 6, 0.5, M.alu, -6.4, TT + 3, VZ + 0.4));
+  const gauge = createGauge({ radius: 2.3, max: 12, step: 2, psiStep: 50 });
+  gauge.group.position.set(-8.4, TT + 2.2, VZ + 1.6);
   g.add(gauge.group);
   comp.gauge = gauge;
-  // ഔട്ട്‌ലെറ്റ് പൈപ്പ്
-  g.add(cylX(0.6, 4, M.brass, 17, 29.5, 4, 16));
-  g.add(cyl(0.5, 4, M.brass, 2, 27.8, 4, 12)); // ടാങ്ക് കണക്ഷൻ
-  // ഡ്രെയിൻ
-  g.add(cyl(0.5, 1.6, M.brass, 0, 2.6, 0, 12));
 
-  comp.ports.push(new Port(g, { id: 'C.out', name: 'Compressor outlet', size: 10, pos: [19, 29.5, 4], normal: [1, 0, 0], comp: 'compressor' }));
+  comp.ports.push(new Port(g, { id: 'C.out', name: 'Compressor outlet', size: 10, pos: [FX, VY, VZ + 0.3], normal: [0, 0, 1], comp: 'compressor',
+    // The hose drops in front of the tank and runs round its right side, clear of the compressor
+    lead: [[FX, VY - 1, VZ + 6], [-11, 13, 21.5], [2, 6, 23], [16, 3, 19], [23, 4, 11]] }));
 
   const l = label('A', 'lbl num');
-  l.position.set(0, 43, 0);
+  l.position.set(0, TOP + 4, 0);
   g.add(l);
 
   let shown = 0;
@@ -410,16 +495,17 @@ export function buildValve52() {
   for (const [num, x] of [[5, -1.6], [3, 3.6]]) {
     const s = new THREE.Group();
     s.position.set(x, Y - 1.8, 0);
-    s.add(cyl(0.45, 0.6, M.brass, 0, -0.3, 0, 12));
-    s.add(cyl(0.6, 1.8, bronze, 0, -1.5, 0, 16));
-    s.add(mesh(new THREE.SphereGeometry(0.6, 16, 8, 0, Math.PI * 2, Math.PI / 2, Math.PI / 2), bronze, 0, -2.4, 0));
+    // Small flat sintered-bronze silencer: brass hex body with a flat filter disc
+    s.add(cyl(0.62, 0.4, M.brass, 0, -0.2, 0, 6));
+    s.add(cyl(0.58, 0.45, M.brass, 0, -0.62, 0, 20));
+    s.add(cyl(0.48, 0.06, bronze, 0, -0.87, 0, 20));
     pickable(s, { kind: 'comp', key: 'silencer' });
     g.add(s);
     comp.silencers[num] = s;
     // ദ്വാരം (silencer ഊരുമ്പോൾ കാണാൻ)
     const hole = cyl(0.42, 0.1, M.black, x, Y - 1.82, 0, 12);
     g.add(hole);
-    comp.exhaustPos[num] = new THREE.Vector3(x, Y - 4.2, 0);      // tip of the silencer
+    comp.exhaustPos[num] = new THREE.Vector3(x, Y - 2.8, 0);      // face of the silencer
     (comp.portPos = comp.portPos || {})[num] = new THREE.Vector3(x, Y - 2.0, 0); // the valve's own exhaust hole
   }
 
@@ -463,6 +549,14 @@ export function buildCylinder() {
   rod.add(cylX(0.62, 16, M.steel, 12.5, 0, 0, 24));
   rod.add(cylX(0.5, 2.4, M.steel, 21.6, 0, 0, 16)); // thread
   rod.add(cylX(0.95, 0.8, M.steel, 21.0, 0, 0, 6));  // nut
+  // Dome: black rubber cap on the rod end (it will press the limit switch later)
+  // tapered on both sides, so a roller limit switch rides up smoothly going forward and back
+  // 28 mm straight middle, short gentle taper (9 mm) at both ends
+  const domeProf = [[0, 0], [0.75, 0], [1.3, 0.05], [2.0, 0.95], [2.0, 3.75], [1.3, 4.65], [1.2, 4.7], [0, 4.7]]
+    .map(([r, y]) => new THREE.Vector2(r, y));
+  const dome = mesh(new THREE.LatheGeometry(domeProf, 40), M.rubber, 21.4, 0, 0);
+  dome.rotation.z = -Math.PI / 2; // lathe axis (Y) → along the rod (+X)
+  rod.add(dome);
   // അകത്തെ piston (ഭാവിയിൽ cut-away view-ന്)
   rod.add(cylX(1.95, 1.6, M.black, 4.4, 0, 0, 32));
   g.add(rod);
@@ -477,6 +571,19 @@ export function buildCylinder() {
   comp.ports.push(new Port(g, { id: 'Y.A', name: 'Cylinder – rear port', size: 4, pos: [1.5, -0.6, 2.3], normal: [0, 0, 1], comp: 'cylinder', tag: 'A' }));
   comp.ports.push(new Port(g, { id: 'Y.B', name: 'Cylinder – front port', size: 4, pos: [16.5, -0.6, 2.3], normal: [0, 0, 1], comp: 'cylinder', tag: 'B' }));
 
+  // Single acting version: no front port, only a small breather vent (the spring is inside)
+  const breather = new THREE.Group();
+  breather.position.set(16.5, -0.6, 2.3);
+  const bz = (r, h, mat, z, seg) => { const m = cyl(r, h, mat, 0, 0, z, seg); m.rotation.x = Math.PI / 2; return m; };
+  breather.add(bz(0.55, 0.35, M.brass, 0.17, 6));
+  breather.add(bz(0.45, 0.25, new THREE.MeshStandardMaterial({ color: 0xa47a3c, metalness: 0.6, roughness: 0.75 }), 0.45, 20));
+  breather.visible = false;
+  g.add(breather);
+  comp.setType = (type) => {
+    breather.visible = type === 'single';
+    comp.ports.find((p) => p.id === 'Y.B').setEnabled(type !== 'single');
+  };
+
   const l = label('F', 'lbl num');
   l.position.set(9, 4.2, 0);
   g.add(l);
@@ -487,19 +594,13 @@ export function buildCylinder() {
   return comp;
 }
 
-// ---------- Wall with switchboard; compressor plugged into the socket ----------
+// ---------- Switchboard on the trainer board; compressor plugged into the socket ----------
 export function buildWall() {
   const g = new THREE.Group();
   const comp = { key: 'wall', group: g, ports: [] };
-  const light = window.matchMedia && window.matchMedia('(prefers-color-scheme: light)').matches;
-  const wallMat = new THREE.MeshStandardMaterial({ color: light ? 0xf1ede6 : 0x4a454c, roughness: 0.95 });
-  const wall = new THREE.Mesh(new THREE.PlaneGeometry(500, 220), wallMat);
-  wall.position.set(10, 35, -32);
-  wall.receiveShadow = true;
-  g.add(wall);
 
   // Switchboard (modular plate): socket with plug + switch + indicator
-  const SX = -82, SY = 54, SZ = -31.6;
+  const SX = -51, SY = 53, SZ = -8.4;
   const plateMat = new THREE.MeshStandardMaterial({ color: 0xfafafa, roughness: 0.4 });
   g.add(roundBox(17, 10, 1.2, 0.5, plateMat, SX, SY, SZ));
   // socket
@@ -524,10 +625,9 @@ export function buildWall() {
   // dummy second switch (looks like a normal board)
   g.add(roundBox(2.6, 4.4, 0.8, 0.3, swMat, SX + 6.3, SY - 1.2, SZ + 0.9));
 
-  // Power cable: compressor switch box → table → wall → plug
+  // Power cable: compressor switch box → up the back of the compressor → plug on the board
   const pts = [
-    [-52, 30.5, 11], [-52, 27, 6], [-58, 12, -6], [-70, 1, -18], [-84, 0.5, -22],
-    [-89, 4, -29], [-88, 30, -30.6], [-86.5, 48, -30.5], [-86.5, 51.2, -29.5],
+    [-50.4, 22, 11.4], [-51, 26, 6], [-54, 33, -1.5], [-55.5, 43, -4.6], [-55.5, 51, -5.4],
   ].map((p) => new THREE.Vector3(...p));
   const cable = mesh(new THREE.TubeGeometry(new THREE.CatmullRomCurve3(pts, false, 'centripetal'), 80, 0.35, 8, false), plugMat);
   g.add(cable);

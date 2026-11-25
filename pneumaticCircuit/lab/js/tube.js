@@ -89,11 +89,15 @@ export class Tube {
       const d = a.distanceTo(b);
       const L = THREE.MathUtils.clamp(d * 0.28, 2.5, 10);
       const ca = a.clone().addScaledVector(na, L), cb = b.clone().addScaledVector(nb, L);
-      const mid = ca.clone().add(cb).multiplyScalar(0.5);
-      mid.y -= Math.min(d * 0.18, 12);
+      // A port can give lead points that the tube follows first (e.g. around the compressor)
+      const la = e0.port.lead.length ? e0.port.leadWorld() : [ca];
+      const lb = e1.port.lead.length ? e1.port.leadWorld() : [cb];
+      const A = la[la.length - 1], B = lb[lb.length - 1];
+      const mid = A.clone().add(B).multiplyScalar(0.5);
+      mid.y -= Math.min(A.distanceTo(B) * 0.18, 12);
       mid.z += Math.min(d * 0.08, 6); // ബോർഡിൽ നിന്ന് അൽപം മുന്നോട്ട്
       mid.y = Math.max(mid.y, 1.2);
-      pts.push(a, a.clone().addScaledVector(na, L * 0.35), ca, mid, cb, b.clone().addScaledVector(nb, L * 0.35), b);
+      pts.push(a, a.clone().addScaledVector(na, L * 0.35), ...la, mid, ...lb.reverse(), b.clone().addScaledVector(nb, L * 0.35), b);
       return pts;
     }
     const port = this.attachedPort;

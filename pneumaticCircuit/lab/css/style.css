@@ -110,6 +110,7 @@ button { font: inherit; cursor: pointer; }
 #tray .tube i { display: inline-block; width: 34px; border-radius: 99px; background: #2a7de1; }
 #tray .t10 i { height: 10px; }
 #tray .t4 i { height: 4px; }
+#tray .tplug i { width: 14px !important; height: 14px; border-radius: 50%; background: #151618 !important; box-shadow: inset 0 0 0 4px #151618, 0 0 0 1px #888; }
 #tray .tube.on { outline: 2px solid var(--copper); background: var(--copper-tint); }
 #btnCancel { border: 1px solid var(--red); background: var(--red-tint); color: var(--red); border-radius: 8px; padding: 7px 12px; }
 

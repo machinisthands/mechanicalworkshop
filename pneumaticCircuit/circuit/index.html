@@ -1,0 +1,286 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Pneumatic Circuit – Draw and Simulate</title>
+<meta name="robots" content="noindex">
+<style>
+/* VOICE: a workshop trainer's own tool — calm, exact, like a circuit sheet on the bench.
+   IDEA: the FluidSIM-style drawing sheet: ISO symbols on squared paper, lines turn blue under pressure.
+   PICTURE: the circuit sheet itself, large, at the top; the tool is the picture.
+   COLOUR and TYPE: site copper accent, white paper, pressure blue #1f63c6; Barlow Condensed titles + Inter.
+   LAYOUT: modest title, mode switch + parts strip, sheet, short how-to beside/below. */
+:root{color-scheme:light dark;--bg:transparent;--card:light-dark(#fff,#211E22);--ink:light-dark(#1d1b1f,#F3F1EE);--muted:light-dark(#6a6470,#A3A097);--line:light-dark(#ddd6cc,#36313A);--copper:#B9805F;--blue:#1f63c6;--red:#d33b2c}
+@font-face{font-family:Inter;font-weight:400;font-display:swap;src:url(../lab/fonts/inter-latin-400-normal.woff2) format('woff2')}
+@font-face{font-family:Inter;font-weight:600;font-display:swap;src:url(../lab/fonts/inter-latin-600-normal.woff2) format('woff2')}
+@font-face{font-family:'Barlow Condensed';font-weight:700;font-display:swap;src:url(../lab/fonts/barlow-condensed-latin-700-normal.woff2) format('woff2')}
+:root[data-theme=light]{color-scheme:light}:root[data-theme=dark]{color-scheme:dark}
+*{box-sizing:border-box;min-width:0}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.55 Inter,system-ui,sans-serif;overflow-x:clip}
+.band{padding:0;max-width:1240px;margin:0 auto}
+html,body{background:transparent}
+h1{font:700 clamp(30px,4vw,44px)/1.05 "Barlow Condensed",sans-serif;margin:0 0 4px;text-wrap:balance}
+.sub{color:var(--muted);margin:0 0 14px;max-width:70ch}
+.bar{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-bottom:10px}
+.seg{display:inline-flex;border:1px solid var(--line);border-radius:10px;overflow:hidden;background:var(--card)}
+.seg button{border:0;border-radius:0}
+button{font:600 14px Inter,sans-serif;min-height:40px;padding:0 14px;border-radius:10px;border:1px solid var(--line);background:var(--card);color:var(--ink);cursor:pointer}
+button:focus-visible{outline:3px solid var(--copper);outline-offset:2px}
+button.on{background:var(--copper);border-color:var(--copper);color:#fff}
+button.warn{color:var(--red)}
+.tools{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:10px}
+.tools[hidden]{display:none}
+.tab{position:absolute;left:0;top:50%;transform:translateY(-50%);z-index:3;min-height:72px;width:34px;padding:0;border-radius:0 12px 12px 0;border-left:0;font-size:22px;background:var(--copper);color:#fff;border-color:var(--copper)}
+.drawer{position:absolute;left:0;top:50%;z-index:4;width:min(236px,66%);max-height:94%;background:var(--card);border:1px solid var(--line);border-left:0;border-radius:0 12px 12px 0;box-shadow:6px 0 24px rgba(0,0,0,.18);padding:8px;overflow-y:auto;transform:translate(-105%,-50%);transition:transform .2s}
+.drawer.open{transform:translate(0,-50%)}
+.drawer h3{font:700 16px "Barlow Condensed",sans-serif;margin:2px 0 8px;display:flex;justify-content:space-between;align-items:center}
+.drawer h3 button{min-height:36px;padding:0 10px}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:6px}
+.grid button{display:flex;flex-direction:column;align-items:center;gap:1px;padding:5px 3px;min-height:58px}
+.grid button:disabled{opacity:.35}
+.grid svg{width:100%;height:26px}
+.grid span{font-size:11px;font-weight:600;text-align:center;line-height:1.2}
+@media(prefers-reduced-motion:reduce){.drawer{transition:none}}
+.sheetwrap{position:relative;background:#fff;border:1px solid var(--line);border-radius:14px;overflow:hidden;touch-action:pan-y pinch-zoom}
+.sheetwrap.edit{touch-action:none}
+#sheet{display:block;width:100%;height:auto;aspect-ratio:3/2;user-select:none}
+@media(max-width:600px){#sheet{aspect-ratio:4/5}}
+.exp{display:inline-flex;align-items:center;gap:8px;font:600 14px Inter,sans-serif;background:var(--card);border:1px solid var(--line);border-radius:10px;padding:0 4px 0 12px;min-height:40px}
+.exp select{font:600 15px Inter,sans-serif;min-height:36px;border:0;background:transparent;color:var(--ink);padding:0 6px}
+.msg{margin-top:8px;font:600 14px Inter,sans-serif;color:var(--ink);background:var(--card);border:1px solid var(--line);border-radius:10px;padding:8px 12px}
+.msg.bad{color:#fff;background:var(--red);border-color:var(--red)}
+.status{display:flex;gap:8px;flex-wrap:wrap;margin:10px 0}
+.status div{background:var(--card);border:1px solid var(--line);border-radius:999px;padding:4px 12px;font-size:14px}
+.status b{margin-right:6px}
+.how{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(260px,100%),1fr));gap:12px;margin-top:6px}
+.how div{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:12px 14px}
+.how h2{font:700 20px "Barlow Condensed",sans-serif;margin:0 0 4px}
+.how ol{margin:0;padding-left:1.2em}
+.note{font-size:13px;color:var(--muted);margin-top:12px}
+@media(max-width:600px){.parts button{min-width:80px}button{padding:0 11px}}
+</style>
+</head>
+<body>
+<main class="band">
+
+<div class="bar">
+  <div class="seg" role="group" aria-label="Mode"><button id="mDraw">✎ Draw</button><button id="mSim">▶ Simulate</button></div>
+  <label class="exp">Experiment
+    <select id="exp"><option value="">Choose…</option><option value="sa">Bus door – single acting</option><option value="da">Bus door – double acting</option></select></label>
+  <button id="undo">↶ Undo</button>
+  <button id="clear" class="warn">Clear</button>
+</div>
+<div class="tools" id="tools">
+  <button id="tLine">⟋ Line</button>
+  <button id="tDel" class="warn">✕ Delete</button>
+  <button id="tFit">⤢ Fit</button>
+</div>
+<div class="sheetwrap">
+  <button class="tab" id="tab" aria-label="Insert a part">›</button>
+  <div class="drawer" id="drawer"><h3>Insert a part <button id="closeDrawer" aria-label="Close">‹</button></h3><div class="grid" id="parts"></div></div>
+  <svg id="sheet" viewBox="0 0 900 600" preserveAspectRatio="xMidYMid meet" aria-label="Circuit drawing sheet"></svg>
+</div>
+<div class="msg" id="msg">Open › to insert a part. Drag parts into place. Use Line to join the ports.</div>
+<div class="status" id="status"></div>
+
+<div class="how">
+  <div><h2>Draw</h2><ol><li>Press <b>Draw</b> first (until then the page scrolls normally over the sheet).</li><li>Tap the <b>›</b> arrow on the left of the sheet and choose a part; drag it into place.</li><li>Press <b>Line</b>: all free ports light up green. Press on one and drag to another (or tap one, then the other).</li><li>Tap a line or a part, then <b>Delete</b>.</li><li><b>Plug</b> (in the › list): tap a port to put a plug in; tap it again to take it out.</li></ol></div>
+  <div><h2>Simulate</h2><ol><li>Press <b>Simulate</b>: the compressor runs.</li><li>Tap the <b>sliding valve</b> to open it.</li><li>Tap the <b>5/2 lever valve</b> to change over.</li><li>Lines under pressure turn <b style="color:var(--blue)">blue</b>; an open port shows a red warning.</li></ol></div>
+</div>
+</main>
+
+<script>
+{
+const svg=document.getElementById('sheet'), msg=document.getElementById('msg');
+const INK='#1d1b1f', BLUE='#1f63c6', RED='#d33b2c', SW=1.6;
+let cur=INK; // colour of the lines being drawn (blue where there is air pressure)
+const blue=(on,fn)=>{const o=cur;cur=on?BLUE:INK;const r=fn();cur=o;return r;};
+const ln=(d,w=SW,extra='')=>`<path d="${d}" fill="none" stroke="${cur}" stroke-width="${w}" stroke-linecap="round" stroke-linejoin="round" ${extra}/>`;
+const fill=(d)=>`<path d="${d}" fill="${cur}"/>`;
+const arrow=(x1,y1,x2,y2)=>{const a=Math.atan2(y2-y1,x2-x1),h=8,w=3.2,bx=x2-h*Math.cos(a),by=y2-h*Math.sin(a);
+ return ln(`M${x1} ${y1}L${bx} ${by}`)+fill(`M${x2} ${y2}L${bx+w*Math.sin(a)} ${by-w*Math.cos(a)}L${bx-w*Math.sin(a)} ${by+w*Math.cos(a)}Z`);};
+const tee=(x,y)=>ln(`M${x} ${y}V${y-8}M${x-5} ${y-8}H${x+5}`);
+const box=(x,y,w,h)=>`<rect x="${x}" y="${y}" width="${w}" height="${h}" fill="#fff" stroke="${INK}" stroke-width="${SW}"/>`;
+// ---- symbols as in the bus door circuit drawing (ISO 1219) ----
+const L={
+ comp:{name:'Compressor',w:60,h:64,ports:{out:[30,0,0,-1]}},
+ frl:{name:'FRL unit',w:240,h:100,ports:{in:[0,60,-1,0],out:[240,60,1,0]}},
+ v32:{name:'3/2 sliding valve',w:156,h:72,ports:{'2':[68,0,0,-1],'1':[68,64,0,1]}},
+ v52:{name:'5/2 lever valve',w:240,h:76,ports:{'4':[100,0,0,-1],'2':[140,0,0,-1],'1':[120,64,0,1]}},
+ sa:{name:'Single acting cylinder',w:170,h:50,ports:{A:[10,50,0,1]}},
+ da:{name:'Double acting cylinder',w:170,h:50,ports:{A:[10,50,0,1],B:[92,50,0,1]}}
+};
+function draw(p){
+ const s=p.state||0;let g='';const on=k=>mode==='sim'&&p.id&&(P[p.id+'.'+k]||0)>0.2;
+ if(p.t==='comp') g=blue(on('out'),()=>ln('M30 0V8'))+`<circle cx="30" cy="36" r="27" fill="#fff" stroke="${INK}" stroke-width="${SW}"/>`+ln('M30 9L23 20H37Z');
+ if(p.t==='frl') g=ln('M10 8H165V92H10Z',1.2,'stroke-dasharray="12 4 2 4"')+blue(on('in'),()=>ln('M0 60H25M65 60H90'))+blue(on('out'),()=>ln('M118 60H185M225 60H240M140 40V60'))
+  +ln('M45 40L65 60L45 80L25 60Z')+ln('M45 40V60',1.2,'stroke-dasharray="3 3"')+ln('M33 68H57')+ln('M45 80V88')
+  +box(90,48,28,24)+arrow(104,66,92,66)+arrow(104,66,116,66)+ln('M90 52L84 56L90 60')
+  +ln('M104 48L96 45L112 40L96 35L112 30L96 25L104 22')+arrow(92,38,118,30)+ln('M118 48L126 55V80H104V72',1.2,'stroke-dasharray="4 3"')
+  +`<circle cx="140" cy="30" r="10" fill="#fff" stroke="${INK}" stroke-width="${SW}"/>`+arrow(133,37,147,23)+`<circle cx="140" cy="60" r="2.6" fill="${INK}"/>`
+  +ln('M205 40L225 60L205 80L185 60Z')+ln('M205 40V48');
+ if(p.t==='v32'){ // two 40-wide squares; normal: right square at 58..98 sits on the ports; open: shifted +40
+  const o=s?40:0, L1=18, R1=58;
+  g=`<g transform="translate(${o},0)">`+box(L1,12,40,40)+box(R1,12,40,40)
+   +blue(s&&on('1'),()=>arrow(L1+10,52,L1+10,12))+tee(L1+30,52)
+   +blue(!s&&on('2'),()=>arrow(R1+10,12,R1+30,52))+tee(R1+10,52)
+   +ln(`M${L1} 26H4V38H${L1}M4 22V42`)+ln(`M${R1+40} 26H${R1+54}V38H${R1+40}M${R1+54} 22V42`)+'</g>'
+   +blue(on('2'),()=>ln('M68 0V12'))+blue(on('1'),()=>ln('M68 52V64'))+ln('M88 52V58')+ln('M82 58H94L88 66Z');
+ }
+ if(p.t==='v52'){ // as in the drawing: two 60×40 squares, ports at 1/6, 1/2, 5/6; normal square (4→5, 1→2) sits on the ports; the lever shifts it 60
+  const o=s?60:0, B=30, A=90, sil=x=>ln(`M${x} 52V58`)+`<rect x="${x-5}" y="58" width="10" height="12" fill="#fff" stroke="${INK}" stroke-width="1.3"/>`+ln(`M${x+3} 61H${x-2}V64H${x+3}V67H${x-2}`,1.1);
+  g=`<g transform="translate(${o},0)">`+box(B,12,60,40)+box(A,12,60,40)
+   +blue(s&&on('1'),()=>arrow(B+30,52,B+10,12))+blue(s&&on('2'),()=>arrow(B+50,12,B+50,52))+tee(B+10,52)
+   +blue(!s&&on('4'),()=>arrow(A+10,12,A+10,52))+blue(!s&&on('1'),()=>arrow(A+30,52,A+50,12))+tee(A+50,52)
+   +ln(`M${B} 37H${B-22}M${B} 47H${B-22}`)+ln(`M${B-28} 54L${B-14} 24`)+`<circle cx="${B-12}" cy="19.5" r="3.5" fill="#fff" stroke="${INK}" stroke-width="1.4"/>`
+   +ln(`M${A+60} 37H${A+71}L${A+74.5} 44L${A+78} 37H${A+88}M${A+60} 48H${A+88}M${A+88} 32V53`)+'</g>'
+   +blue(on('4'),()=>ln('M100 0V12'))+blue(on('2'),()=>ln('M140 0V12'))+blue(on('1'),()=>ln('M120 52V64'))+sil(100)+sil(140);
+ }
+ if(p.t==='sa'||p.t==='da'){
+  const x=18+(p.pos||0)*56;
+  g=blue(on('A'),()=>ln('M10 40V50'))+box(2,6,100,34)+(on('A')?`<rect x="3" y="7" width="${x-3}" height="32" fill="rgba(31,99,198,.22)"/>`:'')+(p.t==='da'&&on('B')?`<rect x="${x}" y="7" width="${101-x}" height="32" fill="rgba(31,99,198,.22)"/>`:'')+ln('M12 6V40')+fill(`M${x-2} 12H${x-12}V34H${x-2}V30H${x-7}V16H${x-2}Z`)+ln(`M${x} 6V40`,2.4)
+   +`<rect x="${x}" y="19" width="88" height="8" fill="#fff" stroke="${INK}" stroke-width="${SW}"/>`;
+  if(p.t==='sa'){let z=`M${x+2} 7`;const n=6,len=100-x-2;for(let i=1;i<=n;i++)z+=`L${x+2+len*i/n} ${i%2?39:7}`;g+=ln(z,1.3);}
+  else g+=blue(on('B'),()=>ln('M92 40V50'))+arrow(x-16,46,x-4,-4);
+ }
+ for(const [k,[px,py,nx,ny]] of Object.entries(L[p.t].ports)){
+  const ref=`${p.id}.${k}`, plugged=p.plugs&&p.plugs[k], used=plugged||lines.some(l=>l.a===ref||l.b===ref);
+  if(plugged){const ex=px+nx*12,ey=py+ny*12;g+=blue(on(k),()=>ln(`M${px} ${py}L${ex} ${ey}M${ex+ny*7} ${ey+nx*7}L${ex-ny*7} ${ey-nx*7}`));
+   if(sel&&sel.plug===ref)g+=`<circle cx="${px+nx*6}" cy="${py+ny*6}" r="13" fill="none" stroke="#b8673a" stroke-width="2" stroke-dasharray="4 3"/>`;}
+  g+=`<circle cx="${px}" cy="${py}" r="2.6" fill="#fff" stroke="${INK}" stroke-width="1.3"/>`;
+  if(p.id&&(mode==='draw'||tool==='plug')&&((tool==='line'&&!used)||(tool==='plug'&&!lines.some(l=>l.a===ref||l.b===ref)))){
+   const hot=wire&&(wire.snap===ref||pick===ref);
+   g+=`<circle cx="${px}" cy="${py}" r="${hot?11:8}" fill="rgba(34,160,91,${hot?.35:.15})" stroke="#22a05b" stroke-width="2.5">${hot?'':'<animate attributeName="r" values="7;10;7" dur="1.2s" repeatCount="indefinite"/>'}</circle>`;}
+ }
+ return g;
+}
+// ---- state ----
+let parts=[],lines=[],nid=1,mode='view',pick=null,sel=null,tool=null,hist=[],wire=null,drag=null;
+const P={};
+const save=()=>{hist.push(JSON.stringify({parts,lines,nid}));if(hist.length>60)hist.shift();};
+const portXY=(ref)=>{const [id,k]=ref.split('.'),p=parts.find(q=>q.id==id),d=L[p.t].ports[k];return {x:p.x+d[0],y:p.y+d[1],nx:d[2],ny:d[3]};};
+function route(a,b){const A=portXY(a),B=portXY(b),s=14,a1=[A.x+A.nx*s,A.y+A.ny*s],b1=[B.x+B.nx*s,B.y+B.ny*s];
+ const mid=A.ny?[a1[0],b1[1]]:[b1[0],a1[1]];return [[A.x,A.y],a1,mid,b1,[B.x,B.y]];}
+const pts=a=>a.map(q=>q.join(',')).join(' ');
+let vb={x:0,y:0,w:900,h:600};
+function fit(){const r=svg.getBoundingClientRect(),asp=(r.width||900)/(r.height||600);
+ let x0=280,y0=180,x1=620,y1=420;if(parts.length){x0=Math.min(...parts.map(p=>p.x))-30;y0=Math.min(...parts.map(p=>p.y))-30;x1=Math.max(...parts.map(p=>p.x+L[p.t].w))+30;y1=Math.max(...parts.map(p=>p.y+L[p.t].h))+30;}
+ let w=Math.max(x1-x0,320),h=Math.max(y1-y0,260);if(w/h<asp)w=h*asp;else h=w/asp;const cx=(x0+x1)/2,cy=(y0+y1)/2;
+ vb={x:cx-w/2,y:cy-h/2,w,h};svg.setAttribute('viewBox',`${vb.x} ${vb.y} ${vb.w} ${vb.h}`);render();}
+function add(t,x,y){save();const p={id:nid++,t,x,y,state:0,pos:0,plugs:{}};parts.push(p);return p;}
+const used=ref=>lines.some(l=>l.a===ref||l.b===ref);
+const partOf=ref=>ref.split('.')[0];
+// the nearest free port to a point (generous radius, so the finger does not need to hit it exactly)
+function nearestPlug(m){const r=svg.getBoundingClientRect(),rad=22*vb.w/(r.width||900);let best=null,bd=rad;
+ for(const p of parts)for(const k in p.plugs){if(!p.plugs[k])continue;const q=portXY(p.id+'.'+k),[,,nx,ny]=L[p.t].ports[k],d=Math.min(Math.hypot(q.x-m.x,q.y-m.y),Math.hypot(q.x+nx*12-m.x,q.y+ny*12-m.y));if(d<bd){bd=d;best=p.id+'.'+k;}}
+ return best;}
+function nearest(m,forPlug,notPart){const r=svg.getBoundingClientRect(),rad=34*vb.w/(r.width||900);let best=null,bd=rad;
+ for(const p of parts)for(const k in L[p.t].ports){const ref=p.id+'.'+k;if(String(p.id)===notPart)continue;
+  if(used(ref)||(!forPlug&&p.plugs[k]))continue;const q=portXY(ref),d=Math.hypot(q.x-m.x,q.y-m.y);if(d<bd){bd=d;best=ref;}}
+ return best;}
+// ---- simulation (same idea as the 3D lab) ----
+function simulate(dt){
+ const uf=new Map(),f=x=>{while(uf.get(x)!==x)x=uf.get(x);return x;},u=(a,b)=>{uf.set(f(a),f(b));},n=x=>{if(!uf.has(x))uf.set(x,x);};
+ const vents=[],src=new Map();
+ for(const p of parts)for(const k in L[p.t].ports)n(p.id+'.'+k);
+ for(const l of lines)u(l.a,l.b);
+ for(const p of parts){const id=p.id+'.';
+  if(p.t==='v32'){if(p.state)u(id+'1',id+'2');else vents.push(id+'2');}
+  if(p.t==='v52'){if(p.state)u(id+'1',id+'4'),vents.push(id+'2');else u(id+'1',id+'2'),vents.push(id+'4');}}
+ const open=[];
+ for(const p of parts)for(const k in L[p.t].ports){const r=p.id+'.'+k;if(!used(r)&&!p.plugs[k])open.push(r);}
+ for(const p of parts)if(p.t==='comp')src.set(f(p.id+'.out'),6);
+ for(const p of parts)if(p.t==='frl'){const i=f(p.id+'.in'),o=f(p.id+'.out');if(src.has(i)&&i!==o)src.set(o,Math.min(4,src.get(i)));}
+ const old={...P};for(const k in P)delete P[k];
+ const vented=new Set([...vents,...open].map(f));
+ for(const r of uf.keys()){const root=f(r);P[r]=src.has(root)?src.get(root):vented.has(root)?0:(old[r]||0);}
+ const leaks=open.filter(r=>src.has(f(r)));
+ for(const p of parts)if(p.t==='sa'||p.t==='da'){const Pa=P[p.id+'.A']||0,Pb=p.t==='da'?(P[p.id+'.B']||0):0;
+  const F=p.t==='sa'?Pa-1.4:Pa-Pb*0.86;if(Math.abs(F)>0.3)p.pos=Math.min(1,Math.max(0,p.pos+Math.sign(F)*Math.min(1.6,0.45*(Math.abs(F)-0.3))*dt));}
+ return leaks;
+}
+// ---- render ----
+function render(leaks=[]){
+ let h=`<defs><pattern id="grid" width="20" height="20" patternUnits="userSpaceOnUse"><path d="M20 0H0V20" fill="none" stroke="#e7ecf2"/></pattern></defs><rect x="-3000" y="-3000" width="6000" height="6000" fill="url(#grid)"/>`;
+ lines.forEach((l,i)=>{const on=mode==='sim'&&(P[l.a]||0)>0.2,r=pts(route(l.a,l.b)),s=sel&&sel.line===i;
+  h+=`<polyline points="${r}" fill="none" stroke="${s?'#b8673a':on?BLUE:INK}" stroke-width="${on?3.2:s?3:SW}" stroke-linejoin="round"/>`;});
+ for(const p of parts)h+=`<g data-part="${p.id}" transform="translate(${p.x},${p.y})" style="cursor:${mode==='sim'?(p.t==='v32'||p.t==='v52'?'pointer':'default'):tool?'crosshair':'grab'}"><rect width="${L[p.t].w}" height="${L[p.t].h}" fill="transparent"/>${draw(p)}${sel&&sel.part===p.id?`<rect x="-6" y="-6" width="${L[p.t].w+12}" height="${L[p.t].h+12}" fill="none" stroke="#b8673a" stroke-dasharray="5 4"/>`:''}</g>`;
+ if(mode==='draw'&&!tool)lines.forEach((l,i)=>{h+=`<polyline data-line="${i}" points="${pts(route(l.a,l.b).slice(1,4))}" fill="none" stroke="transparent" stroke-width="16"/>`;});
+ if(wire&&pick){const a=portXY(pick),e=wire.snap?portXY(wire.snap):wire.cur;
+  h+= wire.snap?`<polyline points="${pts(route(pick,wire.snap))}" fill="none" stroke="#22a05b" stroke-width="2.5" stroke-dasharray="6 4"/>`
+   :e?`<path d="M${a.x} ${a.y}L${e.x} ${e.y}" stroke="#22a05b" stroke-width="2.5" stroke-dasharray="6 4"/>`:'';}
+ for(const r of leaks){const q=portXY(r);h+=`<circle cx="${q.x}" cy="${q.y}" r="10" fill="none" stroke="${RED}" stroke-width="3"><animate attributeName="r" values="6;16;6" dur="0.8s" repeatCount="indefinite"/></circle>`;}
+ svg.innerHTML=h;
+}
+document.getElementById('tDel').onclick=()=>{if(!sel){msg.textContent='Tap a line, a part or a plug first, then Delete';return;}save();if(sel.plug){const [id,k]=sel.plug.split('.');parts.find(p=>p.id==id).plugs[k]=false;}else if(sel.line!=null)lines.splice(sel.line,1);else{const id=String(sel.part);parts=parts.filter(p=>p.id!==sel.part);lines=lines.filter(l=>partOf(l.a)!==id&&partOf(l.b)!==id);}sel=null;render();status([]);};
+function status(leaks){
+ const c=parts.find(p=>p.t==='sa'||p.t==='da');
+ document.getElementById('status').innerHTML=mode!=='sim'?'':`<div><b>Compressor</b>${parts.some(p=>p.t==='comp')?'6.0 bar':'—'}</div><div><b>Cylinder</b>${!c?'—':c.pos>.98?'Extended (door open)':c.pos<.02?'Retracted (door closed)':'Moving'}</div>`;
+ msg.className='msg'+(leaks.length?' bad':'');
+ msg.textContent=mode==='view'?'Press Draw, then use Line to join the parts. Press Simulate to test your circuit':mode==='sim'&&tool==='plug'?'Plug: tap a green port to put a plug in or take it out ':mode==='sim'?(leaks.length?'💨 Air is escaping from an open port':'Tap the sliding valve and the 5/2 lever valve'):tool==='plug'?'Plug: tap a green port to put a plug in, tap a plugged port to take it out ':tool==='line'?(pick?'Drag or tap to the second port':'Line: press on a green port and drag to another (or tap one, then the other)'):sel&&sel.plug?'Plug selected — press Delete to take it out':sel?'Drag to move it, or press Delete':'Open › to insert a part. Drag parts into place. Use Line to join the ports.';
+}
+// ---- parts drawer ----
+const strip=document.getElementById('parts'), drawer=document.getElementById('drawer');
+strip.innerHTML=Object.entries(L).map(([t,d])=>{const p={id:0,t,state:0,pos:0,plugs:{}};const s=Math.min(110/d.w,40/d.h);
+ return `<button data-add="${t}"><svg viewBox="0 0 110 40"><g transform="translate(${(110-d.w*s)/2},${(40-d.h*s)/2}) scale(${s})">${draw(p)}</g></svg><span>${d.name}</span></button>`;}).join('')
+ +`<button data-plug><svg viewBox="0 0 110 40"><path d="M55 32V14M45 14H65" stroke="${INK}" stroke-width="2.4" fill="none"/><circle cx="55" cy="32" r="3" fill="#fff" stroke="${INK}" stroke-width="1.5"/></svg><span>Plug</span></button>`;
+const openDrawer=(o)=>{drawer.classList.toggle('open',o);document.getElementById('tab').hidden=o;
+ strip.querySelectorAll('[data-add]').forEach(b=>b.disabled=mode==='sim');};   // in Simulate only the plug can be used
+document.getElementById('tab').onclick=()=>{setTool(null);openDrawer(true);};
+document.getElementById('closeDrawer').onclick=()=>openDrawer(false);
+strip.onclick=e=>{if(e.target.closest('[data-plug]')){openDrawer(false);setTool('plug');return;}
+ const b=e.target.closest('button[data-add]');if(!b||b.disabled)return;const n=parts.length,d=L[b.dataset.add];
+ sel={part:add(b.dataset.add,Math.round((vb.x+vb.w/2-d.w/2+(n%4)*20)/10)*10,Math.round((vb.y+vb.h/2-d.h/2+(n%4)*20)/10)*10).id};openDrawer(false);render();status([]);};
+function setTool(t){tool=t;pick=null;wire=null;sel=null;document.getElementById('tLine').classList.toggle('on',t==='line');render();status([]);}
+document.getElementById('tFit').onclick=()=>fit();
+document.getElementById('tLine').onclick=()=>setTool(tool==='line'?null:'line');
+// ---- pointer ----
+const pt=e=>{const q=new DOMPoint(e.clientX,e.clientY).matrixTransform(svg.getScreenCTM().inverse());return {x:q.x,y:q.y};};
+function connect(a,b){save();lines.push({a,b});pick=null;wire=null;}
+svg.addEventListener('pointerdown',e=>{if(mode==='view'&&tool!=='plug')return;const m=pt(e),t=e.target,g=t.closest('[data-part]'),line=t.dataset.line;
+ if(mode==='sim'&&tool!=='plug'){if(g){const p=parts.find(q=>q.id==g.dataset.part);if(p.t==='v32'||p.t==='v52')p.state^=1;}return;}
+ if(tool==='plug'){const r=nearest(m,true);if(!r){setTool(null);return;}const [id,k]=r.split('.'),p=parts.find(q=>q.id==id);save();p.plugs[k]=!p.plugs[k];setTool(null);msg.textContent=p.plugs[k]?'Plug fitted':'Plug taken out';return;}
+ if(tool==='line'){
+  if(pick){const r=nearest(m,false,partOf(pick));if(r){connect(pick,r);render();status([]);return;}}
+  const r=nearest(m,false);if(!r){pick=null;wire=null;render();status([]);msg.textContent='Start on a green port';return;}
+  pick=r;wire={cur:m,snap:null,moved:false,x:e.clientX,y:e.clientY};svg.setPointerCapture(e.pointerId);render();status([]);return;}
+ const pl=nearestPlug(m);if(pl){sel={plug:pl};render();status([]);return;}
+ if(line!=null){sel={line:+line};render();status([]);return;}
+ if(g){const p=parts.find(q=>q.id==g.dataset.part);sel={part:p.id};drag={p,dx:m.x-p.x,dy:m.y-p.y,moved:false};svg.setPointerCapture(e.pointerId);render();status([]);return;}
+ sel=null;render();status([]);});
+svg.addEventListener('pointermove',e=>{const m=pt(e);
+ if(wire&&pick){if(Math.hypot(e.clientX-wire.x,e.clientY-wire.y)>6)wire.moved=true;wire.cur=m;wire.snap=nearest(m,false,partOf(pick));render();return;}
+ if(!drag)return;if(!drag.moved){save();drag.moved=true;}
+ drag.p.x=Math.round((m.x-drag.dx)/10)*10;drag.p.y=Math.round((m.y-drag.dy)/10)*10;render();});
+svg.addEventListener('pointerup',()=>{
+ if(wire&&pick){if(wire.moved){if(wire.snap)connect(pick,wire.snap);else{pick=null;wire=null;}}else wire={cur:null,snap:null};render();status([]);}
+ drag=null;});
+// ---- modes, experiments ----
+// 'view': the page scrolls over the sheet; editing starts only when Draw is pressed
+function setMode(m){mode=m;pick=null;wire=null;sel=null;
+ ['tLine','tDel','tFit'].forEach(i=>document.getElementById(i).hidden=m!=='draw');
+ if(m!=='draw'){openDrawer(false);tool=null;document.getElementById('tLine').classList.remove('on');}
+ svg.parentElement.classList.toggle('edit',m==='draw');
+ document.getElementById('tab').hidden=m==='view';for(const p of parts){p.state=0;p.pos=0;}
+ document.getElementById('mDraw').classList.toggle('on',m==='draw');document.getElementById('mSim').classList.toggle('on',m==='sim');render();status([]);}
+document.getElementById('mDraw').onclick=()=>setMode(mode==='draw'?'view':'draw');
+document.getElementById('mSim').onclick=()=>setMode(mode==='sim'?'view':'sim');
+// the parts of the two bus door circuits, laid out as in the drawing
+function experiment(single){save();parts=[];lines=[];nid=1;
+ const c=add('comp',120,560),f=add('frl',190,440),s=add('v32',440,330),v=add('v52',220,170),y=add(single?'sa':'da',310,40);hist.pop();hist.pop();hist.pop();hist.pop();hist.pop();
+ // only the parts are placed: the students draw the lines (and put in a plug) themselves
+ setMode(mode==='draw'?'draw':'view');fit();}
+document.getElementById('exp').onchange=e=>{if(e.target.value)experiment(e.target.value==='sa');};
+document.getElementById('undo').onclick=()=>{const s=hist.pop();if(!s)return;({parts,lines,nid}=JSON.parse(s));sel=null;pick=null;wire=null;render();status([]);};
+document.getElementById('clear').onclick=()=>{save();if(mode!=='draw')setMode('draw');parts=[];lines=[];sel=null;pick=null;wire=null;document.getElementById('exp').value='';fit();status([]);};
+new ResizeObserver(()=>fit()).observe(svg);
+const tellHeight=()=>{try{parent.postMessage({type:'c2d-height',h:document.documentElement.scrollHeight},'*');}catch(e){}};
+new ResizeObserver(tellHeight).observe(document.body);
+let last=performance.now();
+function loop(now){const dt=Math.min(.05,(now-last)/1000);last=now;if(mode==='sim'){const lk=simulate(dt);render(lk);status(lk);}requestAnimationFrame(loop);}
+document.getElementById('exp').value='da';experiment(false);requestAnimationFrame(loop);
+}
+</script>
+</body>
+</html>

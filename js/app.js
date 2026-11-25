@@ -112,6 +112,14 @@
     });
   }
 
+  /* ---------- Circuit diagram (iframe): follows the height of its content ---------- */
+  var c2d = document.getElementById("c2d");
+  if (c2d) {
+    window.addEventListener("message", function (e) {
+      if (e.source === c2d.contentWindow && e.data && e.data.type === "c2d-height" && e.data.h > 200) c2d.style.height = Math.ceil(e.data.h) + "px";
+    });
+  }
+
   /* ---------- 3D viewer: load Three.js only when the model scrolls near ---------- */
   var scene = document.getElementById("viewer");
   if (!scene) return;

@@ -31,10 +31,39 @@ labelRenderer.domElement.style.pointerEvents = 'none';
 host.appendChild(labelRenderer.domElement);
 
 const scene = new THREE.Scene();
-const LIGHT = window.matchMedia && window.matchMedia('(prefers-color-scheme: light)').matches;
-const SCENE_BG = LIGHT ? 0xECE8E3 : 0x17151A;
-scene.background = new THREE.Color(SCENE_BG);
-scene.fog = new THREE.Fog(SCENE_BG, 400, 900);
+// Background: the same blurred workshop photo (HDRI) as the other 3D models on the site.
+// A plain colour shows until it has loaded (it loads after the lab is ready, so it does not slow the start).
+scene.background = new THREE.Color(0x6b5f4a);
+function loadWorkshop() {
+  const s = document.createElement('script');
+  s.src = '../../js/vendor/hdri/workshop.js';
+  s.onload = async () => {
+    if (!window.MH_HDRI) return;
+    try {
+      const { EXRLoader } = await import('three/addons/loaders/EXRLoader.js');
+      const b64 = window.MH_HDRI.slice(window.MH_HDRI.indexOf(',') + 1);
+      window.MH_HDRI = null;
+      const bin = atob(b64), bytes = new Uint8Array(bin.length);
+      for (let i = 0; i < bin.length; i++) bytes[i] = bin.charCodeAt(i);
+      const d = new EXRLoader().parse(bytes.buffer);
+      const tex = new THREE.DataTexture(d.data, d.width, d.height, d.format, d.type);
+      if (d.colorSpace) tex.colorSpace = d.colorSpace;
+      if (d.flipY !== undefined) tex.flipY = d.flipY;
+      tex.minFilter = tex.magFilter = THREE.LinearFilter;
+      tex.generateMipmaps = false;
+      tex.mapping = THREE.EquirectangularReflectionMapping;
+      tex.needsUpdate = true;
+      scene.background = tex;
+      scene.backgroundBlurriness = 0.45;
+      scene.backgroundIntensity = 0.55;
+    } catch (err) {
+      console.warn('Workshop background unavailable.', err);
+    }
+  };
+  document.head.appendChild(s);
+}
+const startBg = () => (window.requestIdleCallback ? requestIdleCallback(loadWorkshop, { timeout: 2000 }) : setTimeout(loadWorkshop, 300));
+if (document.readyState === 'complete') startBg(); else window.addEventListener('load', startBg, { once: true });
 const pmrem = new THREE.PMREMGenerator(renderer);
 scene.environment = pmrem.fromScene(new RoomEnvironment(), 0.04).texture;
 
@@ -81,6 +110,8 @@ function resize() {
   document.documentElement.style.setProperty('--tb', $('topbar').offsetHeight + 'px');
   document.documentElement.style.setProperty('--bb', $('tray').offsetHeight + 'px');
   const w = host.clientWidth, h = host.clientHeight;
+  // Large views (full screen, big monitors) draw at a lower pixel ratio so they stay smooth
+  renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2, Math.max(1, Math.sqrt(2.4e6 / Math.max(1, w * h)))));
   renderer.setSize(w, h);
   labelRenderer.setSize(w, h);
   camera.aspect = w / h;
@@ -160,10 +191,11 @@ function pickAt(x, y, ignoreTube = null) {
   // പോർട്ടിന് മുൻഗണന (ചെറിയതായതിനാൽ)
   for (const h of hits) {
     const p = findPick(h.object);
+    if (p && p.kind === 'port' && !p.port.enabled) continue;
     if (p && p.kind === 'port') return p;
     if (p) {
       // തൊട്ടടുത്ത് ഒരു പോർട്ട് ഉണ്ടോ?
-      const near = hits.find((hh) => findPick(hh.object)?.kind === 'port' && hh.distance - h.distance < 3);
+      const near = hits.find((hh) => { const q = findPick(hh.object); return q?.kind === 'port' && q.port.enabled && hh.distance - h.distance < 3; });
       return near ? findPick(near.object) : p;
     }
   }
@@ -183,8 +215,39 @@ function rayToPlaneZ(x, y, z) {
 const state = { mode: 'idle', size: null, tube: null, end: -1, hoverPort: null, selectedTube: null };
 
 function setTraySize(size) {
-  document.querySelectorAll('#tray .tube').forEach((b) => b.classList.toggle('on', +b.dataset.size === size));
+  document.querySelectorAll('#tray .tube').forEach((b) => b.classList.toggle('on', b.dataset.size === String(size)));
   $('btnCancel').classList.toggle('hidden', !size);
+}
+
+// ---------- Blanking plug (closes an unused 4 mm port) ----------
+function startPlug() {
+  cancelPlacing();
+  state.mode = 'plug';
+  state.size = 'plug';
+  setTraySize('plug');
+  ui.setHint(tr('hintPlug'), true);
+  ui.close();
+}
+function plugProblem(port) {
+  if (port.plugged) return null; // tapping a plugged port takes the plug out
+  if (port.tube) return tr('errOccupied');
+  if (port.selfSealing) return tr('errPlugSelf');
+  if (port.size !== 4) return tr('errPlugSize');
+  return null;
+}
+function togglePlug(port) {
+  const err = plugProblem(port);
+  if (err) { ui.toast(err, true); sound.click(); return false; }
+  port.setPlug(!port.plugged);
+  sound.click();
+  ui.toast(tr(port.plugged ? 'plugIn' : 'plugOut', { name: port.name }));
+  commit();
+  return true;
+}
+function openPlugPanel(port) {
+  ui.open({ title: tr('plugTitle'), sub: '', text: port.name }, [
+    ui.btn(tr('plugRemove'), () => { togglePlug(port); ui.close(); }, 'danger'),
+  ]);
 }
 
 function startPlacing(size) {
@@ -212,6 +275,7 @@ function cancelPlacing() {
 
 function portProblem(port, size) {
   if (port.tube) return tr('errOccupied');
+  if (port.plugged) return tr('errPlugged');
   // Air blowing out of an open port pushes the tube back – it cannot be pushed in
   if (!port.selfSealing && sim.p(port.id) > 0.2) return tr('errBlowing');
   if (port.size !== size) return tr('errSize');
@@ -281,7 +345,8 @@ let currentSnap = [];
 function snapshot() {
   return app.tubes
     .filter((t) => !(t.isNew && t === state.tube)) // a tube still being placed is not saved yet
-    .map((t) => ({ size: t.size, a: t.ends[0].port ? t.ends[0].port.id : null, b: t.ends[1].port ? t.ends[1].port.id : null, free: t.freePos.toArray() }));
+    .map((t) => ({ size: t.size, a: t.ends[0].port ? t.ends[0].port.id : null, b: t.ends[1].port ? t.ends[1].port.id : null, free: t.freePos.toArray() }))
+    .concat(app.ports.filter((p) => p.plugged).map((p) => ({ plug: p.id })));
 }
 function updateHistoryButtons() {
   $('btnUndo').disabled = !history.undo.length;
@@ -299,10 +364,13 @@ function restore(snap) {
   state.tube = null;
   cancelPlacing();
   [...app.tubes].forEach(removeTube);
+  app.ports.forEach((p) => p.setPlug(false));
+  const usable = (id) => id && portById[id].enabled;
   for (const d of snap) {
+    if (d.plug) { if (usable(d.plug)) portById[d.plug].setPlug(true); continue; }
     const t = new Tube(d.size, scene);
-    if (d.a) t.attach(0, portById[d.a]);
-    if (d.b) t.attach(1, portById[d.b]);
+    if (usable(d.a)) t.attach(0, portById[d.a]);
+    if (usable(d.b)) t.attach(1, portById[d.b]);
     t.freePos.fromArray(d.free);
     app.tubes.push(t);
   }
@@ -359,11 +427,8 @@ function openComp(key) {
   if (key === 'valve' || key === 'silencer') {
     // one compact toggle for the lever; the arrow shows which way it is now
     ctl.push(ui.btn(tr('leverToggle') + (sim.lever === 0 ? ' ◀' : ' ▶'), () => setLever(sim.lever ? 0 : 1), 'primary'));
-    for (const [n, side] of [[5, 'Left'], [3, 'Right']]) {
-      ctl.push(ui.btn(tr('sil' + side) + (sim.silencer[n] ? ' ✓' : ' ✕'), () => { sim.silencer[n] = !sim.silencer[n]; sound.click(); refreshPanel(); }, sim.silencer[n] ? '' : 'danger'));
-    }
   }
-  ui.open(key, ctl);
+  ui.open(infoKey(key), ctl);
   ui.current = key;
   $('pSub').textContent = '';
   $('pText').textContent = '';
@@ -381,6 +446,30 @@ function openTubePanel(t) {
   if (t.freeIndex >= 0 && t.connectedCount === 1) ctl.push(ui.btn(tr('pickLoose'), () => pickUpFreeEnd(t), 'primary'));
   ctl.push(ui.btn(tr('removeTube'), () => { removeTube(t); ui.close(); sound.click(); commit(); }, 'danger'));
   ui.open({ title: tr('tubeTitle', { size: t.size }), sub: '', text: tr('endLine', { n: 1, name: name(a) }) + '\n' + tr('endLine', { n: 2, name: name(b) }), tube: t }, ctl);
+}
+
+// The cylinder's text follows the chosen type
+const infoKey = (key) => (key === 'cylinder' && sim.cylType === 'single' ? 'cylinderSingle' : key);
+
+// ---------- Single / double acting cylinder ----------
+function setCylType(type) {
+  if (sim.cylType === type) return;
+  // The front port is not there on a single acting cylinder: its tube end comes out, a plug is taken off
+  const pb = portById['Y.B'];
+  let changed = false;
+  if (type === 'single') {
+    if (pb.tube) { pb.tube.detach(pb.tubeEnd); changed = true; }
+    if (pb.plugged) changed = true;
+  }
+  if (state.mode !== 'idle') cancelPlacing();
+  sim.cylType = type;
+  C.cylinder.setType(type);
+  if (changed) commit();
+  document.querySelectorAll('#cylSeg button').forEach((b) => b.classList.toggle('on', b.dataset.cyl === type));
+  document.querySelectorAll('[data-name="cylinder"]').forEach((el) => (el.textContent = tr(type === 'single' ? 'cylSingleName' : 'cylDoubleName')));
+  sound.click();
+  ui.toast(tr(type === 'single' ? 'toastSingle' : 'toastDouble'));
+  refreshPanel();
 }
 
 // ---------- നിയന്ത്രണങ്ങൾ ----------
@@ -482,7 +571,7 @@ renderer.domElement.addEventListener('pointermove', (e) => {
   }
   if (e.pointerType !== 'mouse') return;
   const pick = pickAt(e.clientX, e.clientY);
-  if (state.mode === 'first') hoverPort(pick && pick.kind === 'port' ? pick.port : null);
+  if (state.mode === 'first' || state.mode === 'plug') hoverPort(pick && pick.kind === 'port' ? pick.port : null);
   else hoverPort(pick && pick.kind === 'port' ? pick.port : null, true);
   ui.showTooltip(tooltipFor(pick), e.clientX, e.clientY);
   renderer.domElement.style.cursor = pick ? 'pointer' : 'grab';
@@ -493,7 +582,7 @@ function tooltipFor(pick) {
   if (!pick) return null;
   if (pick.kind === 'port') return pick.port.desc + (pick.port.tube ? tr('ttHasTube') : '');
   if (pick.kind === 'control') return (pick.action === 'regulator' ? tr(C.frl.knobUp ? 'ttRegUp' : 'ttRegDown') : tr({ power: 'ttPower', mains: 'ttMains', slide: 'ttSlide', lever: 'ttLever', drain: 'ttDrain' }[pick.action]));
-  if (pick.kind === 'comp') return info(pick.key)?.title;
+  if (pick.kind === 'comp') return info(infoKey(pick.key))?.title;
   if (pick.kind === 'tube') return tr('ttTube', { size: pick.tube.size });
   if (pick.kind === 'freeEnd') return tr('ttFree');
   return null;
@@ -510,6 +599,7 @@ function hoverPort(port, plain = false) {
   state.hoverPort = port;
   if (plain) port.highlight('hover');
   else {
+    if (state.mode === 'plug') { port.highlight(plugProblem(port) ? 'bad' : 'ok'); return; }
     const size = state.mode === 'second' ? state.tube.size : state.size;
     port.highlight(portProblem(port, size) ? 'bad' : 'ok');
   }
@@ -528,6 +618,11 @@ function handleClick(x, y) {
     return;
   }
 
+  if (state.mode === 'plug') {
+    if (pick && pick.kind === 'port') { if (togglePlug(pick.port)) cancelPlacing(); }
+    else ui.toast(tr('tapPortPlug'));
+    return;
+  }
   if (state.mode === 'first') {
     if (pick && pick.kind === 'port') onPortClickPlacing(pick.port);
     else ui.toast(tr('tapPort'));
@@ -563,6 +658,7 @@ function handleClick(x, y) {
       break;
     case 'port':
       if (pick.port.tube) openTubePanel(pick.port.tube);
+      else if (pick.port.plugged) openPlugPanel(pick.port);
       else ui.toast(pick.port.desc);
       break;
     case 'tube':
@@ -576,8 +672,15 @@ function handleClick(x, y) {
 
 // ---------- ബട്ടണുകൾ ----------
 document.querySelectorAll('#tray .tube').forEach((b) => {
-  b.onclick = () => { sound.unlock(); const s = +b.dataset.size; state.mode !== 'idle' && state.size === s ? cancelPlacing() : startPlacing(s); };
+  b.onclick = () => {
+    sound.unlock();
+    const s = b.dataset.size === 'plug' ? 'plug' : +b.dataset.size;
+    if (state.mode !== 'idle' && state.size === s) cancelPlacing();
+    else if (s === 'plug') startPlug();
+    else startPlacing(s);
+  };
 });
+document.querySelectorAll('#cylSeg button').forEach((b) => { b.onclick = () => { sound.unlock(); setCylType(b.dataset.cyl); }; });
 $('btnCancel').onclick = () => cancelPlacing();
 $('btnParts').onclick = (e) => {
   // Part letters on the model + the side list appear only while this is on

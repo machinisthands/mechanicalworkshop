@@ -32,6 +32,9 @@ export class Port {
     this.anchor.position.set(...o.pos);
     this.anchor.quaternion.setFromUnitVectors(UP, this.normal);
     parent.add(this.anchor);
+    // Optional points (in the parent's space) a connected tube is laid along, to keep it clear of the part
+    this.parent = parent;
+    this.lead = (o.lead || []).map((v) => new THREE.Vector3(...v));
 
     // push-in fitting (Y ദിശയിൽ ഉണ്ടാക്കി normal-ലേക്ക് തിരിക്കുന്നു)
     const big = this.size === 10;
@@ -53,6 +56,18 @@ export class Port {
     holeBottom.rotation.x = -Math.PI / 2;
     this.anchor.add(hex, body, collet, colTop, holeWall, holeBottom);
     this.tipLen = hexH + bodyH + colH;
+
+    // Blanking plug (closes an unused port); hidden until fitted
+    this.enabled = true;   // false: the port is not on the part (e.g. single acting cylinder has no front port)
+    this.plugged = false;
+    // Black plug pin: Ø4 mm × 30 mm pin pushed in like a 4 mm tube, with a Ø15 mm × 3 mm head on top
+    const plugMat = new THREE.MeshStandardMaterial({ color: 0x151618, roughness: 0.5 });
+    const PIN = 3.0, IN = 1.2; // 30 mm pin, 12 mm of it inside the fitting
+    this.plug = new THREE.Group();
+    this.plug.add(mesh(new THREE.CylinderGeometry(0.2, 0.2, PIN, 16), plugMat, 0, topY - IN + PIN / 2, 0));
+    this.plug.add(mesh(new THREE.CylinderGeometry(0.75, 0.75, 0.3, 32), plugMat, 0, topY - IN + PIN + 0.15, 0));
+    this.plug.visible = false;
+    this.anchor.add(this.plug);
 
     // ക്ലിക്ക് ചെയ്യാൻ എളുപ്പത്തിന് വലിയ അദൃശ്യ ഗോളം
     const pick = new THREE.Mesh(new THREE.SphereGeometry(big ? 2.2 : 1.7, 12, 10), pickMat);
@@ -77,6 +92,21 @@ export class Port {
     return this.anchor.localToWorld(target.set(0, this.tipLen - 0.25, 0));
   }
 
+  setPlug(on) {
+    this.plugged = !!on;
+    this.plug.visible = this.plugged;
+  }
+
+  setEnabled(on) {
+    this.enabled = !!on;
+    this.anchor.visible = this.enabled;
+    if (!on) this.setPlug(false);
+  }
+
+  leadWorld() {
+    return this.lead.map((v) => this.parent.localToWorld(v.clone()));
+  }
+
   worldNormal(target = new THREE.Vector3()) {
     const q = new THREE.Quaternion();
     this.anchor.getWorldQuaternion(q);
@@ -90,6 +120,6 @@ export class Port {
   }
 
   get desc() {
-    return `${this.name} · ${this.size} mm${this.selfSealing ? ' · self-sealing' : ''}`;
+    return `${this.name} · ${this.size} mm${this.selfSealing ? ' · self-sealing' : ''}${this.plugged ? ' · plugged' : ''}`;
   }
 }

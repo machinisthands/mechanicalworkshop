@@ -17,7 +17,6 @@ export const M = {
   clear: new THREE.MeshPhysicalMaterial({ color: 0xeaf6ff, metalness: 0, roughness: 0.05, transparent: true, opacity: 0.35 }),
   oil: new THREE.MeshStandardMaterial({ color: 0xe0b23a, metalness: 0.1, roughness: 0.2, transparent: true, opacity: 0.85 }),
   table: new THREE.MeshStandardMaterial({ color: 0xd9cbb8, metalness: 0.0, roughness: 0.85 }),
-  floor: new THREE.MeshStandardMaterial({ color: (window.matchMedia && window.matchMedia('(prefers-color-scheme: light)').matches) ? 0xe6e2dc : 0x262328, metalness: 0.0, roughness: 1 }),
   slot: new THREE.MeshStandardMaterial({ color: 0x6d757d, metalness: 0.6, roughness: 0.5 }),
 };
 
