@@ -432,6 +432,7 @@ html.sheet-open { overflow: hidden; }
 .sim-play { background: var(--copper); border-color: var(--copper); color: var(--on-copper); }
 .sim-speed { margin-left: auto; display: inline-flex; align-items: center; gap: 6px; color: var(--muted); font-size: .9rem; }
 .sim-speed select { min-height: 36px; border: 1px solid var(--line); border-radius: 8px; background: var(--surface); color: var(--heading); font: inherit; padding: 0 6px; }
+.sim-speed option { background: var(--surface); color: var(--heading); } /* open list readable in dark and light */
 .sim-dro { display: flex; flex-wrap: wrap; gap: 6px 16px; padding: 8px 12px; border: 1px solid var(--line); border-radius: var(--radius); background: var(--code);
   font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: .9rem; color: var(--muted); }
 .sim-dro b { color: var(--heading); font-weight: 700; display: inline-block; min-width: 7ch; }
