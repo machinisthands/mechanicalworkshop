@@ -1,6 +1,6 @@
 # Mechanical Workshop
 
-Study site for the TKMCE mechanical workshop jobs, grouped by semester. Each job page has an
+Study site for the mechanical workshop jobs, grouped by semester. Each job page has an
 interactive 3D model, the engineering drawing, a process guide, a machining video and
 (where available) sample / model questions.
 
